@@ -44,6 +44,9 @@ class BackupRepository {
         'fastingReminderTime': settings.fastingReminderTime,
         'vitrEnabled': settings.vitrEnabled,
         'dailyPrayerGoal': settings.dailyPrayerGoal,
+        'firstName': settings.firstName,
+        'lastName': settings.lastName,
+        'yearDays': settings.yearDays,
       },
       'prayerDebts': [
         for (final p in prayers)
@@ -283,6 +286,16 @@ class BackupRepository {
       fastingReminderTime: Value(minutes('fastingReminderTime')),
       vitrEnabled: Value(read<bool>(s, 'vitrEnabled')),
       dailyPrayerGoal: Value(read<int>(s, 'dailyPrayerGoal').clamp(1, 100)),
+      // Added later; older backups may not have them.
+      firstName: s['firstName'] is String
+          ? Value(s['firstName'] as String)
+          : const Value.absent(),
+      lastName: s['lastName'] is String
+          ? Value(s['lastName'] as String)
+          : const Value.absent(),
+      yearDays: s['yearDays'] == 354 || s['yearDays'] == 365
+          ? Value(s['yearDays'] as int)
+          : const Value.absent(),
     );
 
     return _ParsedBackup(
@@ -319,6 +332,8 @@ class BackupRepository {
       const SettingsCompanion(
         onboardingCompleted: Value(false),
         notificationsEnabled: Value(false),
+        firstName: Value(''),
+        lastName: Value(''),
       ),
     );
   });

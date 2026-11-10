@@ -11,6 +11,7 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/islamic_pattern.dart';
 import '../../core/widgets/progress.dart';
 import '../../shared/domain/debt_summary.dart';
+import '../../shared/domain/period.dart';
 import '../../shared/domain/statistics.dart';
 import '../../shared/providers.dart';
 import '../../shared/widgets/pickers.dart';
@@ -58,6 +59,13 @@ class _HomeBody extends ConsumerWidget {
     final hasDebt = prayer.totalDebt > 0 || fasting.totalDebt > 0;
     final todayActivity =
         activityByDay(snap.records)[today] ?? DayActivity(day: today);
+    final name = settings?.firstName ?? '';
+    final yearDays = settings?.yearDays ?? gregorianYearDays;
+    // One missed day = one of each prayer, so the longest prayer debt is
+    // the time it covers.
+    final prayerDays = PrayerType.visible(vitrEnabled: vitr)
+        .map((t) => snap.prayer(t).remaining)
+        .fold(0, (a, b) => a > b ? a : b);
 
     return ListView(
       padding: pagePadding(context, top: Gap.md, bottom: 32),
@@ -68,7 +76,13 @@ class _HomeBody extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Assalomu alaykum!', style: context.text.headlineSmall),
+                  Text(
+                    name.isEmpty
+                        ? 'Assalomu alaykum!'
+                        : 'Assalomu alaykum, $name!',
+                    key: const Key('greeting'),
+                    style: context.text.headlineSmall,
+                  ),
                   const SizedBox(height: 2),
                   Text(formatWeekdayDate(today), style: context.text.bodySmall),
                 ],
@@ -88,6 +102,9 @@ class _HomeBody extends ConsumerWidget {
           prayer: prayer,
           fasting: fasting,
           hasDebt: hasDebt,
+          prayerPeriod: prayerDays > 0
+              ? '≈ ${formatPeriod(prayerDays, yearDays: yearDays)}'
+              : null,
         ),
         const SizedBox(height: Gap.lg),
         Row(
@@ -208,12 +225,14 @@ class _HeroCard extends StatelessWidget {
     required this.prayer,
     required this.fasting,
     required this.hasDebt,
+    this.prayerPeriod,
   });
 
   final double overall;
   final DebtSummary prayer;
   final DebtSummary fasting;
   final bool hasDebt;
+  final String? prayerPeriod;
 
   @override
   Widget build(BuildContext context) {
@@ -322,6 +341,7 @@ class _HeroCard extends StatelessWidget {
                         label: 'Namoz qarzi',
                         value: formatCount(prayer.remaining),
                         unit: 'ta qoldi',
+                        note: prayerPeriod,
                       ),
                     ),
                     Container(
@@ -353,11 +373,13 @@ class _HeroFigure extends StatelessWidget {
     required this.label,
     required this.value,
     required this.unit,
+    this.note,
   });
 
   final String label;
   final String value;
   final String unit;
+  final String? note;
 
   @override
   Widget build(BuildContext context) {
@@ -386,6 +408,12 @@ class _HeroFigure extends StatelessWidget {
             ],
           ),
         ),
+        if (note != null)
+          Text(
+            note!,
+            key: const Key('prayerPeriod'),
+            style: TextStyle(color: soft, fontSize: 12.5),
+          ),
       ],
     );
   }

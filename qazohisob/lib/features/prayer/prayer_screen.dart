@@ -9,6 +9,7 @@ import '../../core/utilities/date_utils.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/progress.dart';
 import '../../shared/domain/debt_summary.dart';
+import '../../shared/domain/period.dart';
 import '../../shared/providers.dart';
 import '../../shared/widgets/record_tile.dart';
 import '../../shared/widgets/worship_actions.dart';
@@ -142,6 +143,12 @@ class _PrayerCard extends ConsumerWidget {
                       '${formatCount(summary.totalDebt)}',
                       style: context.text.bodySmall,
                     ),
+                    if (summary.remaining > 0)
+                      Text(
+                        '≈ ${formatPeriod(summary.remaining, yearDays: ref.watch(settingsProvider).value?.yearDays ?? gregorianYearDays)} qoldi',
+                        key: Key('period_${type.name}'),
+                        style: context.text.bodySmall,
+                      ),
                   ],
                 ),
               ),

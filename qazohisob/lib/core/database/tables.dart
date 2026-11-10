@@ -80,6 +80,18 @@ class Settings extends Table {
   BoolColumn get onboardingCompleted =>
       boolean().withDefault(const Constant(false))();
 
+  // Added in schema version 2.
+
+  /// User's first name (ism), entered on first launch.
+  TextColumn get firstName => text().withDefault(const Constant(''))();
+
+  /// User's last name (familiya).
+  TextColumn get lastName => text().withDefault(const Constant(''))();
+
+  /// Days per year when converting "years / months / days" into a number of
+  /// missed prayers: 365 (Gregorian) or 354 (Hijri). Chosen by the user.
+  IntColumn get yearDays => integer().withDefault(const Constant(365))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
