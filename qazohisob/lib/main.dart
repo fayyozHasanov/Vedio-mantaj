@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,7 +16,11 @@ Future<void> main() async {
   final db = AppDatabase.open();
   final settings = await SettingsRepository(db).load();
 
-  final scheduler = LocalReminderScheduler();
+  // Local notifications exist only in the native iOS app; the web (PWA)
+  // build has no reminders.
+  final ReminderScheduler scheduler = kIsWeb
+      ? NoopReminderScheduler()
+      : LocalReminderScheduler();
   // Keep scheduled reminders in sync with saved settings (e.g. after a
   // restore or a time-zone change). Failures must not block startup.
   unawaited(

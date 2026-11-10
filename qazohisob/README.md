@@ -95,6 +95,28 @@ flutter build ios --release     # imzolash uchun Xcode’da Team tanlang
 - Minimal iOS/iPadOS: 15.0. iPhone — portret; iPad — barcha yo‘nalishlar,
   kontent markazda 680 pt kenglikda.
 
+## Veb-versiya (PWA) — Mac’siz iPad/iPhone’ga o‘rnatish
+
+Ilova brauzerda ham ishlaydi va **bosh ekranga ilova sifatida** o‘rnatiladi.
+Birinchi ochilishdan keyin to‘liq internetsiz ishlaydi (service worker),
+ma’lumotlar brauzer xotirasidagi SQLite (WebAssembly) bazasida saqlanadi.
+
+```bash
+python3 tool/build_web.py          # natija: build/web
+```
+
+- Build nisbiy `base href` bilan chiqadi — istalgan domen yoki papkadan ishlaydi.
+- `.github/workflows/qazohisob-web.yml` har push’da testlarni yurgizadi,
+  veb-build’ni **qazohisob-web** artefakti (zip) sifatida saqlaydi va
+  repozitoriy ochiq bo‘lsa GitHub Pages’ga joylaydi.
+- Vebda eslatmalar (notification) yo‘q; ma’lumot brauzerda saqlangani uchun
+  vaqti-vaqti bilan JSON zaxira olish tavsiya etiladi.
+- `web/drift_worker.js` — `tool/drift_worker.dart` dan kompilyatsiya qilingan;
+  `web/sqlite3.wasm` — sqlite3 3.5.2 release’idan.
+
+**iPad’ga o‘rnatish:** Safari’da sayt manzilini oching → **Ulashish** (□↑) →
+**Bosh ekranga qo‘shish** → **Qo‘shish**.
+
 ## Testlar
 
 48 ta test: hisob-kitob, qarz qo‘shish, ado qilish, bekor qilish/tiklash,

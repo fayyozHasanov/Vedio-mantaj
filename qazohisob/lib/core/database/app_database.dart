@@ -11,7 +11,17 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   /// Opens the on-device database file.
-  factory AppDatabase.open() => AppDatabase(driftDatabase(name: 'qazohisob'));
+  /// On the web (PWA build) SQLite runs as WebAssembly in a worker and the
+  /// data is kept in the browser's persistent storage.
+  factory AppDatabase.open() => AppDatabase(
+    driftDatabase(
+      name: 'qazohisob',
+      web: DriftWebOptions(
+        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+        driftWorker: Uri.parse('drift_worker.js'),
+      ),
+    ),
+  );
 
   /// Bump this and add a step in [migration] whenever the schema changes.
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// Brand colours.
@@ -203,6 +204,9 @@ abstract final class AppTheme {
   }) {
     final base = ThemeData(
       useMaterial3: true,
+      // Native iOS uses the system font (SF Pro). The web build bundles
+      // Inter so it renders the same offline.
+      fontFamily: kIsWeb ? 'Inter' : null,
       brightness: brightness,
       colorScheme: scheme,
     );

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -117,15 +118,12 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
       final content = csv
           ? await backup.exportCsv()
           : await backup.exportJson();
-      final file = await transfer.writeExport(
+      if (!mounted) return;
+      await transfer.exportAndShare(
+        context,
         content: content,
         extension: csv ? 'csv' : 'json',
-      );
-      if (!mounted) return;
-      await transfer.share(
-        context,
-        file,
-        csv ? 'text/csv' : 'application/json',
+        mimeType: csv ? 'text/csv' : 'application/json',
       );
     } catch (e) {
       if (mounted) showSnack(context, 'Eksport qilib bo‘lmadi: $e');
@@ -294,51 +292,74 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
             ),
           ),
           const SectionHeader('Eslatmalar'),
-          AppCard(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Gap.lg,
-              vertical: 4,
-            ),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  key: const Key('notificationsSwitch'),
-                  contentPadding: EdgeInsets.zero,
-                  secondary: const Icon(Icons.notifications_outlined),
-                  title: const Text('Eslatmalarni yoqish'),
-                  subtitle: const Text(
-                    'Eslatma faqat yodlatadi, hech narsani belgilamaydi',
+          if (kIsWeb)
+            AppCard(
+              key: const Key('webStorageNote'),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: context.palette.textSecondary,
                   ),
-                  value: s.notificationsEnabled,
-                  onChanged: _toggleNotifications,
-                ),
-                if (s.notificationsEnabled) ...[
-                  const Divider(),
-                  _ReminderRow(
-                    keyPrefix: 'prayer',
-                    title: 'Namoz eslatmasi',
-                    enabled: s.prayerReminderEnabled,
-                    minutes: s.prayerReminderTime,
-                    onToggle: (v) => _saveReminders(
-                      SettingsCompanion(prayerReminderEnabled: Value(v)),
+                  const SizedBox(width: Gap.md),
+                  Expanded(
+                    child: Text(
+                      'Veb-versiyada eslatmalar mavjud emas. Ma’lumotlar shu '
+                      'qurilmadagi brauzer xotirasida saqlanadi — vaqti-vaqti '
+                      'bilan “Zaxira nusxa (JSON)” olib qo‘ying.',
+                      style: context.text.bodySmall,
                     ),
-                    onPickTime: () => _pickTime(prayer: true),
-                  ),
-                  const Divider(),
-                  _ReminderRow(
-                    keyPrefix: 'fasting',
-                    title: 'Ro‘za eslatmasi',
-                    enabled: s.fastingReminderEnabled,
-                    minutes: s.fastingReminderTime,
-                    onToggle: (v) => _saveReminders(
-                      SettingsCompanion(fastingReminderEnabled: Value(v)),
-                    ),
-                    onPickTime: () => _pickTime(prayer: false),
                   ),
                 ],
-              ],
+              ),
+            )
+          else
+            AppCard(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Gap.lg,
+                vertical: 4,
+              ),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    key: const Key('notificationsSwitch'),
+                    contentPadding: EdgeInsets.zero,
+                    secondary: const Icon(Icons.notifications_outlined),
+                    title: const Text('Eslatmalarni yoqish'),
+                    subtitle: const Text(
+                      'Eslatma faqat yodlatadi, hech narsani belgilamaydi',
+                    ),
+                    value: s.notificationsEnabled,
+                    onChanged: _toggleNotifications,
+                  ),
+                  if (s.notificationsEnabled) ...[
+                    const Divider(),
+                    _ReminderRow(
+                      keyPrefix: 'prayer',
+                      title: 'Namoz eslatmasi',
+                      enabled: s.prayerReminderEnabled,
+                      minutes: s.prayerReminderTime,
+                      onToggle: (v) => _saveReminders(
+                        SettingsCompanion(prayerReminderEnabled: Value(v)),
+                      ),
+                      onPickTime: () => _pickTime(prayer: true),
+                    ),
+                    const Divider(),
+                    _ReminderRow(
+                      keyPrefix: 'fasting',
+                      title: 'Ro‘za eslatmasi',
+                      enabled: s.fastingReminderEnabled,
+                      minutes: s.fastingReminderTime,
+                      onToggle: (v) => _saveReminders(
+                        SettingsCompanion(fastingReminderEnabled: Value(v)),
+                      ),
+                      onPickTime: () => _pickTime(prayer: false),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
           const SectionHeader('Ma’lumotlar'),
           AppCard(
             padding: const EdgeInsets.symmetric(

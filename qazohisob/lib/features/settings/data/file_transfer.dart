@@ -1,39 +1,54 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/utilities/date_utils.dart';
 
-/// Writes export files and hands them to the iOS share sheet; picks backup
-/// files for restore. Kept separate so the UI stays free of IO details.
+/// Shares export files (iOS share sheet; on the web the browser's share
+/// sheet or a download) and picks backup files for restore. Kept separate
+/// so the UI stays free of IO details.
 class FileTransfer {
   const FileTransfer();
 
-  Future<File> writeExport({
+  static String fileName(String extension, DateTime t) =>
+      'qazohisob_${t.year}${two(t.month)}${two(t.day)}_'
+      '${two(t.hour)}${two(t.minute)}.$extension';
+
+  /// UTF-8 bytes; CSV gets a BOM so spreadsheet apps detect the encoding.
+  static Uint8List encode(String content, String extension) =>
+      Uint8List.fromList(
+        utf8.encode(extension == 'csv' ? '\uFEFF$content' : content),
+      );
+
+  Future<void> exportAndShare(
+    BuildContext context, {
     required String content,
     required String extension,
-    DateTime? now,
+    required String mimeType,
   }) async {
-    final t = now ?? DateTime.now();
-    final dir = await getTemporaryDirectory();
-    final name =
-        'qazohisob_${t.year}${two(t.month)}${two(t.day)}_'
-        '${two(t.hour)}${two(t.minute)}.$extension';
-    final file = File('${dir.path}/$name');
-    // A BOM lets spreadsheet apps detect UTF-8 in CSV files.
-    final data = extension == 'csv' ? '﻿$content' : content;
-    return file.writeAsString(data, encoding: utf8, flush: true);
-  }
-
-  Future<void> share(BuildContext context, File file, String mimeType) async {
+    final name = fileName(extension, DateTime.now());
+    final bytes = encode(content, extension);
+    final XFile file;
+    if (kIsWeb) {
+      file = XFile.fromData(bytes, name: name, mimeType: mimeType);
+    } else {
+      final dir = await getTemporaryDirectory();
+      final f = await File('${dir.path}/$name')
+          .writeAsBytes(bytes, flush: true);
+      file = XFile(f.path, name: name, mimeType: mimeType);
+    }
+    if (!context.mounted) return;
     final box = context.findRenderObject() as RenderBox?;
     await SharePlus.instance.share(
       ShareParams(
-        files: [XFile(file.path, mimeType: mimeType)],
+        files: [file],
+        fileNameOverrides: [name],
         subject: 'QazoHisob ma’lumotlari',
         sharePositionOrigin: box == null
             ? null
@@ -50,6 +65,6 @@ class FileTransfer {
     );
     if (files.isEmpty) return null;
     final bytes = await files.first.readAsBytes();
-    return utf8.decode(bytes, allowMalformed: false);
+    return utf8.decode(bytes);
   }
 }
