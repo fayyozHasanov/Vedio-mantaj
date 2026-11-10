@@ -23,24 +23,33 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.palette;
     final r = BorderRadius.circular(radius);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: r,
-        boxShadow: [
-          BoxShadow(
-            color: p.shadow,
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+    // Each card gets its own layer so scrolling and animations elsewhere
+    // don't force it to repaint.
+    return RepaintBoundary(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: r,
+          border: kLiteEffects
+              ? Border.all(color: context.colors.outlineVariant)
+              : null,
+          boxShadow: kLiteEffects
+              ? null
+              : [
+                  BoxShadow(
+                    color: p.shadow,
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+        ),
+        child: Material(
+          color: color ?? p.card,
+          borderRadius: r,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(padding: padding, child: child),
           ),
-        ],
-      ),
-      child: Material(
-        color: color ?? p.card,
-        borderRadius: r,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(padding: padding, child: child),
         ),
       ),
     );

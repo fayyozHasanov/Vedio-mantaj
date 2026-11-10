@@ -18,13 +18,17 @@ class IslamicPattern extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Static ornament: cached in its own layer, painted once.
     return IgnorePointer(
-      child: CustomPaint(
-        painter: _StarPatternPainter(
-          color: (color ?? Colors.white).withValues(alpha: opacity),
-          tile: tile,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          isComplex: true,
+          painter: _StarPatternPainter(
+            color: (color ?? Colors.white).withValues(alpha: opacity),
+            tile: tile,
+          ),
+          size: Size.infinite,
         ),
-        size: Size.infinite,
       ),
     );
   }

@@ -119,6 +119,10 @@ extension AppThemeContext on BuildContext {
 }
 
 /// Spacing scale.
+/// Web (CanvasKit) pays a high price for blurred shadows and shader-based
+/// ink effects, so the web build uses flat borders and simple ripples.
+const bool kLiteEffects = kIsWeb;
+
 /// Maximum width of page content; on iPad the content is centred.
 const double kMaxContentWidth = 680;
 
@@ -246,7 +250,9 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: scheme.surface,
       textTheme: textTheme,
       extensions: [palette],
-      splashFactory: InkSparkle.splashFactory,
+      splashFactory: kLiteEffects
+          ? InkRipple.splashFactory
+          : InkSparkle.splashFactory,
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
         surfaceTintColor: Colors.transparent,
