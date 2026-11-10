@@ -25,7 +25,7 @@ class PrayerDetailScreen extends ConsumerWidget {
         builder: (snap) {
           final summary = snap.prayer(type);
           return ListView(
-            padding: const EdgeInsets.fromLTRB(Gap.page, Gap.sm, Gap.page, 32),
+            padding: pagePadding(context, top: Gap.sm, bottom: 32),
             children: [
               DebtOverviewCard(
                 summary: summary,

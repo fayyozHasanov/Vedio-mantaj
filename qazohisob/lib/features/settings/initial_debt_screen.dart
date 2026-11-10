@@ -13,7 +13,7 @@ class InitialDebtScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Boshlang‘ich qarzlar')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(Gap.page, Gap.sm, Gap.page, 40),
+        padding: pagePadding(context, top: Gap.sm, bottom: 40),
         children: [
           Text(
             'Bu — sizning taxminiy hisobingiz. Keyin qo‘shilgan qarzlar va ado '

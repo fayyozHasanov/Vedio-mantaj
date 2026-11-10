@@ -198,7 +198,7 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
     return AbsorbPointer(
       absorbing: _busy,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(Gap.page, 0, Gap.page, 40),
+        padding: pagePadding(context, top: 0, bottom: 40),
         children: [
           const SectionHeader('Ko‘rinish'),
           AppCard(

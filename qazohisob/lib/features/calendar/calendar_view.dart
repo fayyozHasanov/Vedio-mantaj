@@ -54,7 +54,7 @@ class _CalendarViewState extends ConsumerState<CalendarView> {
               f: 0,
             ), (s, d) => (p: s.p + d.prayers, f: s.f + d.fasts));
         return ListView(
-          padding: const EdgeInsets.fromLTRB(Gap.page, Gap.lg, Gap.page, 32),
+          padding: pagePadding(context, top: Gap.lg, bottom: 32),
           children: [
             AppCard(
               padding: const EdgeInsets.fromLTRB(

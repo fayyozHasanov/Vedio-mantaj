@@ -1,6 +1,6 @@
 # QazoHisob
 
-Qazo namoz va qazo ro‘zalarni hisoblab borish uchun iOS ilova (Flutter).
+Qazo namoz va qazo ro‘zalarni hisoblab borish uchun iPhone va iPad ilovasi (Flutter).
 Internetsiz ishlaydi, barcha ma’lumotlar faqat qurilmada saqlanadi.
 
 <p>
@@ -92,13 +92,14 @@ flutter build ios --release     # imzolash uchun Xcode’da Team tanlang
 
 - Bundle ID: `uz.qazohisob.qazohisob` (Xcode → Runner → Signing’da
   o‘zgartiring).
-- Minimal iOS: 15.0, faqat iPhone, portret.
+- Minimal iOS/iPadOS: 15.0. iPhone — portret; iPad — barcha yo‘nalishlar,
+  kontent markazda 680 pt kenglikda.
 
 ## Testlar
 
-46 ta test: hisob-kitob, qarz qo‘shish, ado qilish, bekor qilish/tiklash,
+48 ta test: hisob-kitob, qarz qo‘shish, ado qilish, bekor qilish/tiklash,
 manfiy qarzning oldini olish, takroriy yozuvlar, fayl bazada saqlanish,
-zaxira/tiklash, CSV, statistika va asosiy ekranlar uchun widget testlar.
+zaxira/tiklash, CSV, statistika va asosiy ekranlar uchun widget testlar (iPhone va iPad o‘lchamlarida).
 
 ```bash
 flutter test

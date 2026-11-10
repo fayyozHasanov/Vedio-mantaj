@@ -60,7 +60,7 @@ class _HomeBody extends ConsumerWidget {
         activityByDay(snap.records)[today] ?? DayActivity(day: today);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Gap.page, Gap.md, Gap.page, 32),
+      padding: pagePadding(context, top: Gap.md, bottom: 32),
       children: [
         Row(
           children: [

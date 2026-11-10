@@ -50,124 +50,132 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(
-              height: 52,
-              child: Row(
-                children: [
-                  if (_page > 0)
-                    IconButton(
-                      tooltip: 'Orqaga',
-                      onPressed: () => _goTo(_page - 1),
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 20,
-                      ),
-                    ),
-                  const Spacer(),
-                  if (_page < _debtPage)
-                    TextButton(
-                      key: const Key('skipOnboarding'),
-                      onPressed: () => _goTo(_debtPage),
-                      child: const Text('O‘tkazib yuborish'),
-                    ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: PageView(
-                controller: _controller,
-                physics: const NeverScrollableScrollPhysics(),
-                onPageChanged: (p) => setState(() => _page = p),
-                children: [
-                  const _IntroPage(
-                    hero: AppMark(size: 112),
-                    title: 'QazoHisob’ga\nxush kelibsiz',
-                    text:
-                        'Qazo namoz va ro‘zalaringizni tartibli, xotirjam '
-                        'va maxfiy tarzda hisoblab boring.',
-                    bullets: [
-                      'Internetsiz ishlaydi',
-                      'Ma’lumotlar faqat qurilmangizda',
-                      'Har bir yozuv sana va vaqti bilan saqlanadi',
-                    ],
-                  ),
-                  const _IntroPage(
-                    hero: _IconHero(icon: Icons.mosque_rounded),
-                    title: 'Namoz qazolari',
-                    text:
-                        'Bomdod, Peshin, Asr, Shom va Xufton alohida '
-                        'hisoblanadi. Vitrni xohlasangiz alohida yoqasiz.',
-                    bullets: [
-                      'Qazo ado qilganingizda o‘zingiz belgilaysiz',
-                      'Keyin aniqlangan qazolarni qo‘shish mumkin',
-                      'Xato yozuvni bekor qilish va tuzatish mumkin',
-                    ],
-                  ),
-                  const _IntroPage(
-                    hero: _IconHero(icon: Icons.nightlight_round, gold: true),
-                    title: 'Ro‘za qazolari',
-                    text: 'Ramazondan qolgan ro‘zalarni kunma-kun qayd eting.',
-                    bullets: [
-                      'Har bir tutilgan kun qarzni aynan 1 kunga kamaytiradi',
-                      'Ro‘za tutilgan sanani o‘zingiz tanlaysiz',
-                      'Hech narsa avtomatik belgilanmaydi',
-                    ],
-                  ),
-                  _DebtPage(
-                    onSaved: () {
-                      setState(() => _debtSaved = true);
-                      _goTo(_lastPage);
-                    },
-                    onSkip: () => _goTo(_lastPage),
-                  ),
-                  _IntroPage(
-                    hero: const AppMark(size: 112),
-                    title: 'Hammasi tayyor',
-                    text: _debtSaved
-                        ? 'Qarzlaringiz saqlandi. Endi har bir ado qilgan '
-                              'qazongizni belgilab borishingiz mumkin.'
-                        : 'Qarz miqdorlarini istalgan vaqtda Sozlamalar → '
-                              '“Boshlang‘ich qarzlar” bo‘limida kiritishingiz '
-                              'mumkin.',
-                    bullets: const [
-                      'Ilova fatvo bermaydi va hukm chiqarmaydi',
-                      'Shaxsiy savollar bo‘yicha malakali olimga murojaat '
-                          'qiling',
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            if (_page != _debtPage)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  Gap.page,
-                  Gap.sm,
-                  Gap.page,
-                  Gap.lg,
-                ),
-                child: Column(
-                  children: [
-                    _Dots(count: 5, index: _page),
-                    const SizedBox(height: Gap.lg),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        key: const Key('onboardingNext'),
-                        onPressed: _page == _lastPage
-                            ? _finish
-                            : () => _goTo(_page + 1),
-                        child: Text(
-                          _page == _lastPage ? 'Boshlash' : 'Davom etish',
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 52,
+                  child: Row(
+                    children: [
+                      if (_page > 0)
+                        IconButton(
+                          tooltip: 'Orqaga',
+                          onPressed: () => _goTo(_page - 1),
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 20,
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
+                      const Spacer(),
+                      if (_page < _debtPage)
+                        TextButton(
+                          key: const Key('skipOnboarding'),
+                          onPressed: () => _goTo(_debtPage),
+                          child: const Text('O‘tkazib yuborish'),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-          ],
+                Expanded(
+                  child: PageView(
+                    controller: _controller,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: (p) => setState(() => _page = p),
+                    children: [
+                      const _IntroPage(
+                        hero: AppMark(size: 112),
+                        title: 'QazoHisob’ga\nxush kelibsiz',
+                        text:
+                            'Qazo namoz va ro‘zalaringizni tartibli, xotirjam '
+                            'va maxfiy tarzda hisoblab boring.',
+                        bullets: [
+                          'Internetsiz ishlaydi',
+                          'Ma’lumotlar faqat qurilmangizda',
+                          'Har bir yozuv sana va vaqti bilan saqlanadi',
+                        ],
+                      ),
+                      const _IntroPage(
+                        hero: _IconHero(icon: Icons.mosque_rounded),
+                        title: 'Namoz qazolari',
+                        text:
+                            'Bomdod, Peshin, Asr, Shom va Xufton alohida '
+                            'hisoblanadi. Vitrni xohlasangiz alohida yoqasiz.',
+                        bullets: [
+                          'Qazo ado qilganingizda o‘zingiz belgilaysiz',
+                          'Keyin aniqlangan qazolarni qo‘shish mumkin',
+                          'Xato yozuvni bekor qilish va tuzatish mumkin',
+                        ],
+                      ),
+                      const _IntroPage(
+                        hero: _IconHero(
+                          icon: Icons.nightlight_round,
+                          gold: true,
+                        ),
+                        title: 'Ro‘za qazolari',
+                        text: 'Ramazondan qolgan ro‘zalarni kunma-kun qayd eting.',
+                        bullets: [
+                          'Har bir tutilgan kun qarzni aynan 1 kunga kamaytiradi',
+                          'Ro‘za tutilgan sanani o‘zingiz tanlaysiz',
+                          'Hech narsa avtomatik belgilanmaydi',
+                        ],
+                      ),
+                      _DebtPage(
+                        onSaved: () {
+                          setState(() => _debtSaved = true);
+                          _goTo(_lastPage);
+                        },
+                        onSkip: () => _goTo(_lastPage),
+                      ),
+                      _IntroPage(
+                        hero: const AppMark(size: 112),
+                        title: 'Hammasi tayyor',
+                        text: _debtSaved
+                            ? 'Qarzlaringiz saqlandi. Endi har bir ado qilgan '
+                                  'qazongizni belgilab borishingiz mumkin.'
+                            : 'Qarz miqdorlarini istalgan vaqtda Sozlamalar → '
+                                  '“Boshlang‘ich qarzlar” bo‘limida kiritishingiz '
+                                  'mumkin.',
+                        bullets: const [
+                          'Ilova fatvo bermaydi va hukm chiqarmaydi',
+                          'Shaxsiy savollar bo‘yicha malakali olimga murojaat '
+                              'qiling',
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (_page != _debtPage)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Gap.page,
+                      Gap.sm,
+                      Gap.page,
+                      Gap.lg,
+                    ),
+                    child: Column(
+                      children: [
+                        _Dots(count: 5, index: _page),
+                        const SizedBox(height: Gap.lg),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            key: const Key('onboardingNext'),
+                            onPressed: _page == _lastPage
+                                ? _finish
+                                : () => _goTo(_page + 1),
+                            child: Text(
+                              _page == _lastPage ? 'Boshlash' : 'Davom etish',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -279,7 +287,7 @@ class _DebtPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Gap.page, Gap.sm, Gap.page, Gap.xxl),
+      padding: pagePadding(context, top: Gap.sm, bottom: Gap.xxl),
       children: [
         Text('Boshlang‘ich qarzlar', style: context.text.headlineSmall),
         const SizedBox(height: 4),

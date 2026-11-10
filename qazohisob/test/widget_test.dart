@@ -18,9 +18,11 @@ Future<AppDatabase> pumpApp(
   WidgetTester tester, {
   bool onboarded = true,
   Future<void> Function(WorshipRepository repo)? seed,
+  Size size = const Size(1179, 2556), // iPhone 15
+  double pixelRatio = 3,
 }) async {
-  tester.view.physicalSize = const Size(1179, 2556); // iPhone 15
-  tester.view.devicePixelRatio = 3;
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = pixelRatio;
   addTearDown(tester.view.reset);
 
   final db = memoryDb();
@@ -59,9 +61,17 @@ void testApp(
   Future<void> Function(WidgetTester tester) body, {
   bool onboarded = true,
   Future<void> Function(WorshipRepository repo)? seed,
+  Size size = const Size(1179, 2556),
+  double pixelRatio = 3,
 }) {
   testWidgets(description, (tester) async {
-    final db = await pumpApp(tester, onboarded: onboarded, seed: seed);
+    final db = await pumpApp(
+      tester,
+      onboarded: onboarded,
+      seed: seed,
+      size: size,
+      pixelRatio: pixelRatio,
+    );
     await body(tester);
     await disposeApp(tester, db);
   });
@@ -284,4 +294,43 @@ void main() {
     await tapAndSettle(tester, find.text('Ha, o‘chirish'));
     expect(find.text('QazoHisob’ga\nxush kelibsiz'), findsOneWidget);
   }, seed: seedDebts);
+
+  // iPad Pro 11" in landscape (1194 x 834 points).
+  const ipadLandscape = Size(2388, 1668);
+
+  testApp(
+    'iPad: content is centred with a readable width',
+    (tester) async {
+      expect(find.text('Assalomu alaykum!'), findsOneWidget);
+      final card = tester.getRect(find.byKey(const Key('settingsButton')));
+      final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+      // Content column is centred and no wider than the max content width.
+      final hero = tester.getRect(find.text('Assalomu alaykum!'));
+      expect(hero.left, greaterThan((screen.width - 680) / 2 - 1));
+      expect(card.right, lessThan((screen.width + 680) / 2 + 1));
+
+      for (final tab in ['Namoz qazolari', 'Ro‘za qazolari', 'Hisobot']) {
+        await tapAndSettle(tester, find.text(tab));
+      }
+      await tapAndSettle(tester, find.text('Kalendar'));
+      expect(
+        await textOf(tester, find.byKey(const Key('monthTitle'))),
+        'Noyabr 2026',
+      );
+    },
+    seed: seedDebts,
+    size: ipadLandscape,
+    pixelRatio: 2,
+  );
+
+  testApp(
+    'iPad: onboarding fits in portrait',
+    (tester) async {
+      await tapAndSettle(tester, find.byKey(const Key('skipOnboarding')));
+      expect(find.text('Boshlang‘ich qarzlar'), findsOneWidget);
+    },
+    onboarded: false,
+    size: const Size(1668, 2388),
+    pixelRatio: 2,
+  );
 }

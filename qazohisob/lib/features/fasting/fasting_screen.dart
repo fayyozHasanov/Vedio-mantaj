@@ -22,7 +22,7 @@ class FastingScreen extends ConsumerWidget {
         builder: (snap) {
           final summary = snap.fasting;
           return ListView(
-            padding: const EdgeInsets.fromLTRB(Gap.page, Gap.sm, Gap.page, 32),
+            padding: pagePadding(context, top: Gap.sm, bottom: 32),
             children: [
               DebtOverviewCard(
                 summary: summary,

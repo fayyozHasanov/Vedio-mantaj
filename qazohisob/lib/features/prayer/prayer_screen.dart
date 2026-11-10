@@ -28,7 +28,7 @@ class PrayerScreen extends ConsumerWidget {
         builder: (snap) {
           final total = snap.prayerTotal(vitrEnabled: vitr);
           return ListView(
-            padding: const EdgeInsets.fromLTRB(Gap.page, Gap.sm, Gap.page, 32),
+            padding: pagePadding(context, top: Gap.sm, bottom: 32),
             children: [
               _TotalCard(total: total),
               const SectionHeader('Namozlar'),

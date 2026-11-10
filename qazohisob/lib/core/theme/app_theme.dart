@@ -118,6 +118,22 @@ extension AppThemeContext on BuildContext {
 }
 
 /// Spacing scale.
+/// Maximum width of page content; on iPad the content is centred.
+const double kMaxContentWidth = 680;
+
+/// Page padding that keeps a phone-like reading width on wide screens.
+EdgeInsets pagePadding(
+  BuildContext context, {
+  double top = 0,
+  double bottom = 32,
+}) {
+  final width = MediaQuery.sizeOf(context).width;
+  final side = width > kMaxContentWidth + 2 * Gap.page
+      ? (width - kMaxContentWidth) / 2
+      : Gap.page;
+  return EdgeInsets.fromLTRB(side, top, side, bottom);
+}
+
 abstract final class Gap {
   static const xs = 4.0;
   static const sm = 8.0;

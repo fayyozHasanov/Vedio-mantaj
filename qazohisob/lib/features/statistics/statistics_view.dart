@@ -37,7 +37,7 @@ class StatisticsView extends ConsumerWidget {
           days: 30,
         );
         return ListView(
-          padding: const EdgeInsets.fromLTRB(Gap.page, Gap.lg, Gap.page, 32),
+          padding: pagePadding(context, top: Gap.lg, bottom: 32),
           children: [
             AppCard(
               padding: const EdgeInsets.all(Gap.xl),
