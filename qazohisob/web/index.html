@@ -39,6 +39,43 @@
     <img src="icons/Icon-192.png" alt="">
     <div>QazoHisob</div>
   </div>
+  <script>
+    // If the app fails to start, show the reason on the splash screen so the
+    // user can send a screenshot instead of staring at a blank page.
+    (function () {
+      function show(text) {
+        var splash = document.getElementById('splash');
+        if (!splash) return;
+        var box = document.getElementById('splash-msg');
+        if (!box) {
+          box = document.createElement('div');
+          box.id = 'splash-msg';
+          box.style.cssText = 'max-width:520px;padding:0 24px;text-align:center;' +
+            'font-size:14px;line-height:1.5;color:#5B6660;white-space:pre-wrap';
+          splash.appendChild(box);
+          var again = document.createElement('a');
+          again.href = '#';
+          again.textContent = 'Qayta yuklash';
+          again.style.cssText = 'color:#075B46;font-weight:600;font-size:16px';
+          again.onclick = function (e) { e.preventDefault(); location.reload(); };
+          splash.appendChild(again);
+        }
+        box.textContent = text + '\n\n' + navigator.userAgent;
+      }
+      window.addEventListener('error', function (e) {
+        show('Xato: ' + (e.message || e.error || 'noma’lum'));
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        var r = e.reason;
+        show('Xato: ' + ((r && r.message) || r || 'noma’lum'));
+      });
+      setTimeout(function () {
+        if (document.getElementById('splash') && !document.getElementById('splash-msg')) {
+          show('Ilova yuklanishi odatdagidan uzoq davom etyapti.');
+        }
+      }, 30000);
+    })();
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
