@@ -13,6 +13,7 @@ import '../../core/utilities/date_utils.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/dialogs.dart';
 import '../../shared/domain/exceptions.dart';
+import '../../shared/domain/period.dart';
 import '../../shared/providers.dart';
 import '../../shared/widgets/record_tile.dart';
 import 'data/file_transfer.dart';
@@ -163,6 +164,59 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
     }
   }
 
+  Future<void> _editProfile() async {
+    final first = TextEditingController(text: s.firstName);
+    final last = TextEditingController(text: s.lastName);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Profil'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              key: const Key('editFirstName'),
+              controller: first,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(labelText: 'Ism'),
+            ),
+            const SizedBox(height: Gap.md),
+            TextField(
+              key: const Key('editLastName'),
+              controller: last,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(labelText: 'Familiya'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Bekor qilish'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(48, 44)),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Saqlash'),
+          ),
+        ],
+      ),
+    );
+    final firstName = first.text;
+    final lastName = last.text;
+    first.dispose();
+    last.dispose();
+    if (ok != true || !mounted) return;
+    if (firstName.trim().isEmpty || lastName.trim().isEmpty) {
+      showSnack(context, 'Ism va familiya bo‘sh bo‘lmasligi kerak');
+      return;
+    }
+    await ref
+        .read(settingsRepositoryProvider)
+        .saveProfile(firstName: firstName, lastName: lastName);
+    if (mounted) showSnack(context, 'Profil saqlandi');
+  }
+
   Future<void> _reset() async {
     final first = await showConfirmDialog(
       context,
@@ -198,6 +252,32 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
       child: ListView(
         padding: pagePadding(context, top: 0, bottom: 40),
         children: [
+          const SectionHeader('Profil'),
+          AppCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Gap.lg,
+              vertical: 4,
+            ),
+            child: ListTile(
+              key: const Key('profileTile'),
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                backgroundColor: context.colors.primary,
+                foregroundColor: Colors.white,
+                child: Text(
+                  s.firstName.isEmpty ? '?' : s.firstName[0].toUpperCase(),
+                ),
+              ),
+              title: Text(
+                s.firstName.isEmpty
+                    ? 'Ism kiritilmagan'
+                    : '${s.firstName} ${s.lastName}',
+              ),
+              subtitle: const Text('Ism va familiyani o‘zgartirish'),
+              trailing: const Icon(Icons.edit_rounded),
+              onTap: _editProfile,
+            ),
+          ),
           const SectionHeader('Ko‘rinish'),
           AppCard(
             child: Column(
@@ -247,6 +327,20 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                   subtitle: const Text('Taxminiy qazo miqdorlarini tahrirlash'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push('/settings/initial'),
+                ),
+                const Divider(),
+                ListTile(
+                  key: const Key('yearKindTile'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.calendar_month_rounded),
+                  title: const Text('Yil hisobi'),
+                  subtitle: Text(yearKindLabel(s.yearDays)),
+                  trailing: Switch(
+                    value: s.yearDays == hijriYearDays,
+                    onChanged: (hijri) => settingsRepo.setYearDays(
+                      hijri ? hijriYearDays : gregorianYearDays,
+                    ),
+                  ),
                 ),
                 const Divider(),
                 SwitchListTile(

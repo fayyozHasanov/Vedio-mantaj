@@ -29,4 +29,28 @@ class SettingsRepository {
 
   Future<void> setOnboardingCompleted(bool done) =>
       update(SettingsCompanion(onboardingCompleted: Value(done)));
+
+  /// Saves the user's name. Entering the name completes sign-in, so the
+  /// welcome flow never starts over even if the rest of onboarding is
+  /// skipped or the app is closed half-way.
+  Future<void> saveProfile({
+    required String firstName,
+    required String lastName,
+  }) {
+    final first = firstName.trim();
+    final last = lastName.trim();
+    if (first.isEmpty || last.isEmpty) {
+      throw ArgumentError('Ism va familiya bo‘sh bo‘lmasligi kerak');
+    }
+    return update(
+      SettingsCompanion(
+        firstName: Value(first),
+        lastName: Value(last),
+        onboardingCompleted: const Value(true),
+      ),
+    );
+  }
+
+  Future<void> setYearDays(int days) =>
+      update(SettingsCompanion(yearDays: Value(days)));
 }

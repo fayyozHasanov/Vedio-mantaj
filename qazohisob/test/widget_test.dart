@@ -211,29 +211,62 @@ void main() {
     expect(remaining.textSpan!.toPlainText(), '4 kun');
   }, seed: seedDebts);
 
-  testApp('onboarding saves initial debts and opens the dashboard', (
+  Future<void> signIn(WidgetTester tester) async {
+    expect(find.text('Tanishib olaylik'), findsOneWidget);
+    // Name is required: an empty form does not continue.
+    await tapAndSettle(tester, find.byKey(const Key('saveProfile')));
+    expect(find.text('Ismingizni kiriting'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('firstNameField')), 'Ali');
+    await tester.enterText(find.byKey(const Key('lastNameField')), 'Valiyev');
+    await tapAndSettle(tester, find.byKey(const Key('saveProfile')));
+  }
+
+  testApp('onboarding: name, period-based debts, then the dashboard', (
     tester,
   ) async {
     expect(find.text('QazoHisob’ga\nxush kelibsiz'), findsOneWidget);
-    for (var i = 0; i < 3; i++) {
+    await tapAndSettle(tester, find.byKey(const Key('onboardingNext')));
+    await signIn(tester);
+    for (var i = 0; i < 2; i++) {
       await tapAndSettle(tester, find.byKey(const Key('onboardingNext')));
     }
     expect(find.text('Boshlang‘ich qarzlar'), findsOneWidget);
-    await tester.enterText(find.byKey(const Key('fillDaysField')), '20');
+    // 1 year (Gregorian, 365) + 2 months (60) + 5 days = 430 per prayer.
+    await tester.enterText(find.byKey(const Key('periodYears')), '1');
+    await tester.enterText(find.byKey(const Key('periodMonths')), '2');
+    await tester.enterText(find.byKey(const Key('periodDays')), '5');
+    await tester.pumpAndSettle();
+    expect(
+      await textOf(tester, find.byKey(const Key('periodResult'))),
+      '= 430 kun → har bir namozga 430 ta',
+    );
     await tapAndSettle(tester, find.byKey(const Key('fillAllButton')));
-    await tester.enterText(find.byKey(const Key('initial_fast')), '7');
+    // 2 Ramadans (60 days) + 3 days.
+    await reveal(tester, find.byKey(const Key('ramadanYears')));
+    await tester.enterText(find.byKey(const Key('ramadanYears')), '2');
+    await tester.enterText(find.byKey(const Key('ramadanExtraDays')), '3');
+    await tapAndSettle(tester, find.byKey(const Key('fillFastButton')));
     await tapAndSettle(tester, find.byKey(const Key('saveInitial')));
     expect(find.text('Hammasi tayyor'), findsOneWidget);
     await tapAndSettle(tester, find.byKey(const Key('onboardingNext')));
-    expect(find.text('Assalomu alaykum!'), findsOneWidget);
-    expect(find.text('100'), findsWidgets); // 5 prayers x 20
-    expect(find.text('7 kun'), findsOneWidget);
+    expect(find.text('Assalomu alaykum, Ali!'), findsOneWidget);
+    expect(find.text('2 150'), findsWidgets); // 5 prayers x 430
+    expect(find.text('63 kun'), findsOneWidget);
+    expect(
+      await textOf(tester, find.byKey(const Key('prayerPeriod'))),
+      '≈ 1 yil 2 oy 5 kun',
+    );
   }, onboarded: false);
 
-  testApp('onboarding debt entry can be skipped', (tester) async {
+  testApp('onboarding debt entry can be skipped, but not the name', (
+    tester,
+  ) async {
+    await tapAndSettle(tester, find.byKey(const Key('skipOnboarding')));
+    await signIn(tester);
     await tapAndSettle(tester, find.byKey(const Key('skipOnboarding')));
     await tapAndSettle(tester, find.byKey(const Key('skipDebt')));
     await tapAndSettle(tester, find.byKey(const Key('onboardingNext')));
+    expect(find.text('Assalomu alaykum, Ali!'), findsOneWidget);
     expect(find.text('Qarzlaringizni kiritib boshlang'), findsOneWidget);
   }, onboarded: false);
 
@@ -327,7 +360,7 @@ void main() {
     'iPad: onboarding fits in portrait',
     (tester) async {
       await tapAndSettle(tester, find.byKey(const Key('skipOnboarding')));
-      expect(find.text('Boshlang‘ich qarzlar'), findsOneWidget);
+      expect(find.text('Tanishib olaylik'), findsOneWidget);
     },
     onboarded: false,
     size: const Size(1668, 2388),

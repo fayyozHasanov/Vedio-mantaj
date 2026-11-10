@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_texts.dart';
 import '../../core/constants/worship_types.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utilities/date_utils.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/dialogs.dart';
 import '../domain/exceptions.dart';
+import '../domain/period.dart';
 import '../providers.dart';
 
 /// Form for the user's own estimate of missed prayers and fasts.
@@ -34,7 +36,13 @@ class _InitialDebtFormState extends ConsumerState<InitialDebtForm> {
     for (final t in PrayerType.values) t: TextEditingController(),
   };
   final TextEditingController _fasting = TextEditingController();
-  final TextEditingController _fillDays = TextEditingController();
+  // Period of missed prayers (years / months / days).
+  final _years = TextEditingController();
+  final _months = TextEditingController();
+  final _days = TextEditingController();
+  // Missed Ramadans (+ extra days) for fasting.
+  final _ramadans = TextEditingController();
+  final _extraFastDays = TextEditingController();
   bool _saving = false;
   bool _loaded = false;
 
@@ -63,17 +71,31 @@ class _InitialDebtFormState extends ConsumerState<InitialDebtForm> {
     for (final c in _prayer.values) {
       c.dispose();
     }
-    _fasting.dispose();
-    _fillDays.dispose();
+    for (final c in [
+      _fasting,
+      _years,
+      _months,
+      _days,
+      _ramadans,
+      _extraFastDays,
+    ]) {
+      c.dispose();
+    }
     super.dispose();
   }
 
   int _read(TextEditingController c) => int.tryParse(c.text.trim()) ?? 0;
 
-  void _fillAll(bool vitr) {
-    final days = _read(_fillDays);
+  int _periodDays(int yearDays) => Period(
+    years: _read(_years),
+    months: _read(_months),
+    days: _read(_days),
+  ).toDays(yearDays: yearDays);
+
+  void _fillAll(bool vitr, int yearDays) {
+    final days = _periodDays(yearDays);
     if (days <= 0) {
-      showSnack(context, 'Avval kunlar sonini kiriting');
+      showSnack(context, 'Avval yil, oy yoki kun kiriting');
       return;
     }
     setState(() {
@@ -106,7 +128,10 @@ class _InitialDebtFormState extends ConsumerState<InitialDebtForm> {
 
   @override
   Widget build(BuildContext context) {
-    final vitr = ref.watch(settingsProvider).value?.vitrEnabled ?? false;
+    final settings = ref.watch(settingsProvider).value;
+    final vitr = settings?.vitrEnabled ?? false;
+    final yearDays = settings?.yearDays ?? gregorianYearDays;
+    final periodDays = _periodDays(yearDays);
     if (!_loaded) return const Center(child: CircularProgressIndicator());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -116,36 +141,79 @@ class _InitialDebtFormState extends ConsumerState<InitialDebtForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Tez to‘ldirish (ixtiyoriy)',
+                'Qazo muddati bo‘yicha (ixtiyoriy)',
                 style: context.text.titleSmall,
               ),
               const SizedBox(height: 4),
               Text(
-                'Har bir namozdan bir xil miqdorda qazo bo‘lsa, sonini bir '
-                'marta kiriting — barcha namoz maydonlariga yoziladi. '
-                'Miqdorni o‘zingiz belgilaysiz.',
+                'Necha yil, oy va kun namoz qazo bo‘lgan bo‘lsa kiriting — '
+                'har bir namozga shuncha kun yoziladi. 1 oy = 30 kun. '
+                'Yil turini o‘zingiz tanlaysiz; natijani pastda tahrirlash '
+                'mumkin.',
                 style: context.text.bodySmall,
+              ),
+              const SizedBox(height: Gap.md),
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<int>(
+                  key: const Key('yearKind'),
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(
+                      value: gregorianYearDays,
+                      label: Text('Milodiy (365)'),
+                    ),
+                    ButtonSegment(
+                      value: hijriYearDays,
+                      label: Text('Hijriy (354)'),
+                    ),
+                  ],
+                  selected: {yearDays},
+                  onSelectionChanged: (v) =>
+                      ref.read(settingsRepositoryProvider).setYearDays(v.first),
+                ),
+              ),
+              const SizedBox(height: Gap.md),
+              Row(
+                children: [
+                  for (final (key, label, c) in [
+                    ('periodYears', 'Yil', _years),
+                    ('periodMonths', 'Oy', _months),
+                    ('periodDays', 'Kun', _days),
+                  ]) ...[
+                    Expanded(
+                      child: TextField(
+                        key: Key(key),
+                        controller: c,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(4),
+                        ],
+                        decoration: InputDecoration(labelText: label),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    ),
+                    if (key != 'periodDays') const SizedBox(width: Gap.sm),
+                  ],
+                ],
               ),
               const SizedBox(height: Gap.md),
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      key: const Key('fillDaysField'),
-                      controller: _fillDays,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(6),
-                      ],
-                      decoration: const InputDecoration(hintText: 'Soni'),
+                    child: Text(
+                      '= ${formatCount(periodDays)} kun → har bir namozga '
+                      '${formatCount(periodDays)} ta',
+                      key: const Key('periodResult'),
+                      style: context.text.titleSmall,
                     ),
                   ),
-                  const SizedBox(width: Gap.sm),
                   FilledButton.tonal(
                     key: const Key('fillAllButton'),
-                    onPressed: () => _fillAll(vitr),
-                    child: const Text('To‘ldirish'),
+                    onPressed: () => _fillAll(vitr, yearDays),
+                    child: const Text('Yozish'),
                   ),
                 ],
               ),
@@ -188,6 +256,72 @@ class _InitialDebtFormState extends ConsumerState<InitialDebtForm> {
           ),
         ),
         const SectionHeader('Qazo ro‘zalar'),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Ramazonlar soni bo‘yicha (ixtiyoriy)',
+                style: context.text.titleSmall,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '1 Ramazon = 30 kun deb olinadi. Aniq sonni pastdagi maydonda '
+                'o‘zgartirishingiz mumkin.',
+                style: context.text.bodySmall,
+              ),
+              const SizedBox(height: Gap.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      key: const Key('ramadanYears'),
+                      controller: _ramadans,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(3),
+                      ],
+                      decoration: const InputDecoration(labelText: 'Ramazon'),
+                    ),
+                  ),
+                  const SizedBox(width: Gap.sm),
+                  Expanded(
+                    child: TextField(
+                      key: const Key('ramadanExtraDays'),
+                      controller: _extraFastDays,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(4),
+                      ],
+                      decoration: const InputDecoration(labelText: '+ kun'),
+                    ),
+                  ),
+                  const SizedBox(width: Gap.sm),
+                  FilledButton.tonal(
+                    key: const Key('fillFastButton'),
+                    onPressed: () {
+                      final total =
+                          _read(_ramadans) * daysPerMonth +
+                          _read(_extraFastDays);
+                      if (total <= 0) {
+                        showSnack(context, 'Avval Ramazonlar sonini kiriting');
+                        return;
+                      }
+                      setState(() => _fasting.text = '$total');
+                      FocusScope.of(context).unfocus();
+                    },
+                    child: const Text('Yozish'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: Gap.md),
         AppCard(
           child: _NumberRow(
             fieldKey: const Key('initial_fast'),

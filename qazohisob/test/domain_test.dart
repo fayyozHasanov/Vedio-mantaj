@@ -4,6 +4,7 @@ import 'package:qazohisob/core/database/app_database.dart';
 import 'package:qazohisob/core/notifications/reminder_scheduler.dart';
 import 'package:qazohisob/core/utilities/date_utils.dart';
 import 'package:qazohisob/shared/domain/debt_summary.dart';
+import 'package:qazohisob/shared/domain/period.dart';
 import 'package:qazohisob/shared/domain/statistics.dart';
 
 var _id = 0;
@@ -171,6 +172,34 @@ void main() {
         nextDailyOccurrence(8 * 60, DateTime(2026, 12, 31, 9)),
         DateTime(2027, 1, 1, 8),
       );
+    });
+  });
+
+  group('period (years / months / days)', () {
+    test('converts to days with the chosen year length', () {
+      const p = Period(years: 2, months: 3, days: 10);
+      expect(p.toDays(yearDays: gregorianYearDays), 2 * 365 + 90 + 10);
+      expect(p.toDays(yearDays: hijriYearDays), 2 * 354 + 90 + 10);
+    });
+
+    test('splits days back into a readable period', () {
+      expect(formatPeriod(430, yearDays: 365), '1 yil 2 oy 5 kun');
+      expect(formatPeriod(365, yearDays: 365), '1 yil');
+      expect(formatPeriod(45, yearDays: 365), '1 oy 15 kun');
+      expect(formatPeriod(0, yearDays: 365), '0 kun');
+      expect(formatPeriod(354, yearDays: 354), '1 yil');
+      expect(
+        Period.fromDays(800, yearDays: 365),
+        const Period(years: 2, months: 2, days: 10),
+      );
+    });
+
+    test('round-trips for any number of days', () {
+      for (final yd in [gregorianYearDays, hijriYearDays]) {
+        for (var d = 0; d < 1500; d += 7) {
+          expect(Period.fromDays(d, yearDays: yd).toDays(yearDays: yd), d);
+        }
+      }
     });
   });
 }

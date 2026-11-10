@@ -9,8 +9,11 @@ import '../../core/widgets/islamic_pattern.dart';
 import '../../shared/providers.dart';
 import '../../shared/widgets/initial_debt_form.dart';
 
-/// First-launch flow: welcome, prayer intro, fasting intro, initial debt
-/// entry (skippable) and start.
+/// First-launch flow: welcome, name (required — this is the sign-in),
+/// prayer intro, fasting intro, initial debt entry (skippable) and start.
+///
+/// Saving the name marks onboarding as completed, so closing the app later
+/// in the flow never brings the user back to the beginning.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -23,8 +26,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _page = 0;
   bool _debtSaved = false;
 
-  static const _debtPage = 3;
-  static const _lastPage = 4;
+  static const _profilePage = 1;
+  static const _debtPage = 4;
+  static const _lastPage = 5;
+  static const _pageCount = 6;
 
   @override
   void dispose() {
@@ -45,6 +50,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await ref.read(settingsRepositoryProvider).setOnboardingCompleted(true);
     if (mounted) context.go('/home');
   }
+
+  /// Pages that have their own buttons instead of the shared bottom bar.
+  bool get _ownButtons => _page == _profilePage || _page == _debtPage;
+
+  /// "Skip" jumps over the intro pages but never over the name.
+  int? get _skipTarget => switch (_page) {
+    0 => _profilePage,
+    2 || 3 => _debtPage,
+    _ => null,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +84,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                         ),
                       const Spacer(),
-                      if (_page < _debtPage)
+                      if (_skipTarget != null)
                         TextButton(
                           key: const Key('skipOnboarding'),
-                          onPressed: () => _goTo(_debtPage),
+                          onPressed: () => _goTo(_skipTarget!),
                           child: const Text('O‘tkazib yuborish'),
                         ),
                     ],
@@ -96,6 +111,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           'Har bir yozuv sana va vaqti bilan saqlanadi',
                         ],
                       ),
+                      _ProfilePage(onSaved: () => _goTo(_profilePage + 1)),
                       const _IntroPage(
                         hero: _IconHero(icon: Icons.mosque_rounded),
                         title: 'Namoz qazolari',
@@ -146,7 +162,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ],
                   ),
                 ),
-                if (_page != _debtPage)
+                if (!_ownButtons)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       Gap.page,
@@ -156,7 +172,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     child: Column(
                       children: [
-                        _Dots(count: 5, index: _page),
+                        _Dots(count: _pageCount, index: _page),
                         const SizedBox(height: Gap.lg),
                         SizedBox(
                           width: double.infinity,
@@ -178,6 +194,117 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Sign-in: first and last name. Required before using the app.
+class _ProfilePage extends ConsumerStatefulWidget {
+  const _ProfilePage({required this.onSaved});
+
+  final VoidCallback onSaved;
+
+  @override
+  ConsumerState<_ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<_ProfilePage> {
+  final _first = TextEditingController();
+  final _last = TextEditingController();
+  bool _submitted = false;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final s = ref.read(settingsProvider).value;
+    if (s != null) {
+      _first.text = s.firstName;
+      _last.text = s.lastName;
+    }
+  }
+
+  @override
+  void dispose() {
+    _first.dispose();
+    _last.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() => _submitted = true);
+    if (_first.text.trim().isEmpty || _last.text.trim().isEmpty) return;
+    setState(() => _saving = true);
+    await ref
+        .read(settingsRepositoryProvider)
+        .saveProfile(firstName: _first.text, lastName: _last.text);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    FocusScope.of(context).unfocus();
+    widget.onSaved();
+  }
+
+  String? _error(TextEditingController c, String what) =>
+      _submitted && c.text.trim().isEmpty ? '$what kiriting' : null;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(28, Gap.lg, 28, Gap.xxl),
+      children: [
+        const Center(child: _IconHero(icon: Icons.person_rounded, gold: true)),
+        const SizedBox(height: Gap.xxl),
+        Text(
+          'Tanishib olaylik',
+          textAlign: TextAlign.center,
+          style: context.text.headlineMedium,
+        ),
+        const SizedBox(height: Gap.sm),
+        Text(
+          'Ism va familiyangizni kiriting. Ular faqat shu qurilmada saqlanadi.',
+          textAlign: TextAlign.center,
+          style: context.text.bodyLarge?.copyWith(
+            color: context.palette.textSecondary,
+          ),
+        ),
+        const SizedBox(height: Gap.xxl),
+        TextField(
+          key: const Key('firstNameField'),
+          controller: _first,
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.givenName],
+          maxLength: 40,
+          decoration: InputDecoration(
+            labelText: 'Ism',
+            counterText: '',
+            errorText: _error(_first, 'Ismingizni'),
+          ),
+          onChanged: (_) => _submitted ? setState(() {}) : null,
+        ),
+        const SizedBox(height: Gap.md),
+        TextField(
+          key: const Key('lastNameField'),
+          controller: _last,
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.familyName],
+          maxLength: 40,
+          decoration: InputDecoration(
+            labelText: 'Familiya',
+            counterText: '',
+            errorText: _error(_last, 'Familiyangizni'),
+          ),
+          onChanged: (_) => _submitted ? setState(() {}) : null,
+          onSubmitted: (_) => _save(),
+        ),
+        const SizedBox(height: Gap.xl),
+        FilledButton(
+          key: const Key('saveProfile'),
+          onPressed: _saving ? null : _save,
+          child: const Text('Kirish'),
+        ),
+      ],
     );
   }
 }

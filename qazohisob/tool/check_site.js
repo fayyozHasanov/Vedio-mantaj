@@ -60,6 +60,18 @@ const SHOT = process.argv[3] || 'qazohisob-check.png';
     // Fresh browser profile -> onboarding. Skip through it.
     if (await hasText('O‘tkazib yuborish')) {
       await tap('O‘tkazib yuborish');
+      // Sign-in: first and last name are required.
+      const type = async (label, text) => {
+        // Flutter creates the real <input> only for the focused field.
+        await page.getByRole('textbox', { name: label }).first().click();
+        await page.waitForTimeout(400);
+        await page.keyboard.type(text);
+        await page.waitForTimeout(300);
+      };
+      await type('Ism', 'Tekshiruv');
+      await type('Familiya', 'Bot');
+      await tap('Kirish');
+      await tap('O‘tkazib yuborish');
       await tap('Keyinroq kiritaman');
       await tap('Boshlash');
     }

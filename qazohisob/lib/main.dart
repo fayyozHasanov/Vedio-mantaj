@@ -9,6 +9,7 @@ import 'core/database/app_database.dart';
 import 'core/notifications/reminder_scheduler.dart';
 import 'core/widgets/startup_error_app.dart';
 import 'shared/data/settings_repository.dart';
+import 'shared/data/onboarding_state.dart';
 import 'shared/providers.dart';
 
 Future<void> main() async {
@@ -22,11 +23,13 @@ Future<void> main() async {
 Future<void> start() async {
   final AppDatabase db;
   final Setting settings;
+  final bool onboarded;
   try {
     db = AppDatabase.open();
     settings = await SettingsRepository(db)
         .load()
         .timeout(const Duration(seconds: 20));
+    onboarded = await isOnboarded(db);
   } catch (error, stack) {
     debugPrint('QazoHisob startup failed: $error\n$stack');
     runApp(StartupErrorApp(error: error, onRetry: start));
@@ -54,7 +57,7 @@ Future<void> start() async {
         databaseProvider.overrideWithValue(db),
         reminderSchedulerProvider.overrideWithValue(scheduler),
       ],
-      child: QazoHisobApp(onboarded: settings.onboardingCompleted),
+      child: QazoHisobApp(onboarded: onboarded),
     ),
   );
 }

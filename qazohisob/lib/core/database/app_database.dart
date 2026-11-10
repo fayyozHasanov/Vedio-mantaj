@@ -18,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump this and add a step in [migration] whenever the schema changes.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -27,8 +27,7 @@ class AppDatabase extends _$AppDatabase {
     },
     onUpgrade: (m, from, to) async {
       // Run each step in order so users upgrading across several
-      // versions get every change. Example for a future version 2:
-      //   if (from < 2) { await m.addColumn(...); }
+      // versions get every change.
       for (var version = from + 1; version <= to; version++) {
         await _migrateTo(m, version);
       }
@@ -41,7 +40,11 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> _migrateTo(Migrator m, int version) async {
     switch (version) {
-      // No migrations yet: version 1 is the first released schema.
+      case 2:
+        // Profile (name) and the year length used for period conversion.
+        await m.addColumn(settings, settings.firstName);
+        await m.addColumn(settings, settings.lastName);
+        await m.addColumn(settings, settings.yearDays);
       default:
         break;
     }

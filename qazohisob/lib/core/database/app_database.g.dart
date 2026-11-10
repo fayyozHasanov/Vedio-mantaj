@@ -1480,6 +1480,42 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _firstNameMeta = const VerificationMeta(
+    'firstName',
+  );
+  @override
+  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
+    'first_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _lastNameMeta = const VerificationMeta(
+    'lastName',
+  );
+  @override
+  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
+    'last_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _yearDaysMeta = const VerificationMeta(
+    'yearDays',
+  );
+  @override
+  late final GeneratedColumn<int> yearDays = GeneratedColumn<int>(
+    'year_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(365),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1492,6 +1528,9 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     vitrEnabled,
     dailyPrayerGoal,
     onboardingCompleted,
+    firstName,
+    lastName,
+    yearDays,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1580,6 +1619,24 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         ),
       );
     }
+    if (data.containsKey('first_name')) {
+      context.handle(
+        _firstNameMeta,
+        firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta),
+      );
+    }
+    if (data.containsKey('last_name')) {
+      context.handle(
+        _lastNameMeta,
+        lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
+      );
+    }
+    if (data.containsKey('year_days')) {
+      context.handle(
+        _yearDaysMeta,
+        yearDays.isAcceptableOrUnknown(data['year_days']!, _yearDaysMeta),
+      );
+    }
     return context;
   }
 
@@ -1631,6 +1688,18 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         DriftSqlType.bool,
         data['${effectivePrefix}onboarding_completed'],
       )!,
+      firstName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}first_name'],
+      )!,
+      lastName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_name'],
+      )!,
+      yearDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}year_days'],
+      )!,
     );
   }
 
@@ -1656,6 +1725,16 @@ class Setting extends DataClass implements Insertable<Setting> {
   final bool vitrEnabled;
   final int dailyPrayerGoal;
   final bool onboardingCompleted;
+
+  /// User's first name (ism), entered on first launch.
+  final String firstName;
+
+  /// User's last name (familiya).
+  final String lastName;
+
+  /// Days per year when converting "years / months / days" into a number of
+  /// missed prayers: 365 (Gregorian) or 354 (Hijri). Chosen by the user.
+  final int yearDays;
   const Setting({
     required this.id,
     required this.theme,
@@ -1667,6 +1746,9 @@ class Setting extends DataClass implements Insertable<Setting> {
     required this.vitrEnabled,
     required this.dailyPrayerGoal,
     required this.onboardingCompleted,
+    required this.firstName,
+    required this.lastName,
+    required this.yearDays,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1685,6 +1767,9 @@ class Setting extends DataClass implements Insertable<Setting> {
     map['vitr_enabled'] = Variable<bool>(vitrEnabled);
     map['daily_prayer_goal'] = Variable<int>(dailyPrayerGoal);
     map['onboarding_completed'] = Variable<bool>(onboardingCompleted);
+    map['first_name'] = Variable<String>(firstName);
+    map['last_name'] = Variable<String>(lastName);
+    map['year_days'] = Variable<int>(yearDays);
     return map;
   }
 
@@ -1700,6 +1785,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       vitrEnabled: Value(vitrEnabled),
       dailyPrayerGoal: Value(dailyPrayerGoal),
       onboardingCompleted: Value(onboardingCompleted),
+      firstName: Value(firstName),
+      lastName: Value(lastName),
+      yearDays: Value(yearDays),
     );
   }
 
@@ -1731,6 +1819,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       onboardingCompleted: serializer.fromJson<bool>(
         json['onboardingCompleted'],
       ),
+      firstName: serializer.fromJson<String>(json['firstName']),
+      lastName: serializer.fromJson<String>(json['lastName']),
+      yearDays: serializer.fromJson<int>(json['yearDays']),
     );
   }
   @override
@@ -1749,6 +1840,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       'vitrEnabled': serializer.toJson<bool>(vitrEnabled),
       'dailyPrayerGoal': serializer.toJson<int>(dailyPrayerGoal),
       'onboardingCompleted': serializer.toJson<bool>(onboardingCompleted),
+      'firstName': serializer.toJson<String>(firstName),
+      'lastName': serializer.toJson<String>(lastName),
+      'yearDays': serializer.toJson<int>(yearDays),
     };
   }
 
@@ -1763,6 +1857,9 @@ class Setting extends DataClass implements Insertable<Setting> {
     bool? vitrEnabled,
     int? dailyPrayerGoal,
     bool? onboardingCompleted,
+    String? firstName,
+    String? lastName,
+    int? yearDays,
   }) => Setting(
     id: id ?? this.id,
     theme: theme ?? this.theme,
@@ -1775,6 +1872,9 @@ class Setting extends DataClass implements Insertable<Setting> {
     vitrEnabled: vitrEnabled ?? this.vitrEnabled,
     dailyPrayerGoal: dailyPrayerGoal ?? this.dailyPrayerGoal,
     onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+    firstName: firstName ?? this.firstName,
+    lastName: lastName ?? this.lastName,
+    yearDays: yearDays ?? this.yearDays,
   );
   Setting copyWithCompanion(SettingsCompanion data) {
     return Setting(
@@ -1804,6 +1904,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       onboardingCompleted: data.onboardingCompleted.present
           ? data.onboardingCompleted.value
           : this.onboardingCompleted,
+      firstName: data.firstName.present ? data.firstName.value : this.firstName,
+      lastName: data.lastName.present ? data.lastName.value : this.lastName,
+      yearDays: data.yearDays.present ? data.yearDays.value : this.yearDays,
     );
   }
 
@@ -1819,7 +1922,10 @@ class Setting extends DataClass implements Insertable<Setting> {
           ..write('fastingReminderTime: $fastingReminderTime, ')
           ..write('vitrEnabled: $vitrEnabled, ')
           ..write('dailyPrayerGoal: $dailyPrayerGoal, ')
-          ..write('onboardingCompleted: $onboardingCompleted')
+          ..write('onboardingCompleted: $onboardingCompleted, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('yearDays: $yearDays')
           ..write(')'))
         .toString();
   }
@@ -1836,6 +1942,9 @@ class Setting extends DataClass implements Insertable<Setting> {
     vitrEnabled,
     dailyPrayerGoal,
     onboardingCompleted,
+    firstName,
+    lastName,
+    yearDays,
   );
   @override
   bool operator ==(Object other) =>
@@ -1850,7 +1959,10 @@ class Setting extends DataClass implements Insertable<Setting> {
           other.fastingReminderTime == this.fastingReminderTime &&
           other.vitrEnabled == this.vitrEnabled &&
           other.dailyPrayerGoal == this.dailyPrayerGoal &&
-          other.onboardingCompleted == this.onboardingCompleted);
+          other.onboardingCompleted == this.onboardingCompleted &&
+          other.firstName == this.firstName &&
+          other.lastName == this.lastName &&
+          other.yearDays == this.yearDays);
 }
 
 class SettingsCompanion extends UpdateCompanion<Setting> {
@@ -1864,6 +1976,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<bool> vitrEnabled;
   final Value<int> dailyPrayerGoal;
   final Value<bool> onboardingCompleted;
+  final Value<String> firstName;
+  final Value<String> lastName;
+  final Value<int> yearDays;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.theme = const Value.absent(),
@@ -1875,6 +1990,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.vitrEnabled = const Value.absent(),
     this.dailyPrayerGoal = const Value.absent(),
     this.onboardingCompleted = const Value.absent(),
+    this.firstName = const Value.absent(),
+    this.lastName = const Value.absent(),
+    this.yearDays = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1887,6 +2005,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.vitrEnabled = const Value.absent(),
     this.dailyPrayerGoal = const Value.absent(),
     this.onboardingCompleted = const Value.absent(),
+    this.firstName = const Value.absent(),
+    this.lastName = const Value.absent(),
+    this.yearDays = const Value.absent(),
   });
   static Insertable<Setting> custom({
     Expression<int>? id,
@@ -1899,6 +2020,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Expression<bool>? vitrEnabled,
     Expression<int>? dailyPrayerGoal,
     Expression<bool>? onboardingCompleted,
+    Expression<String>? firstName,
+    Expression<String>? lastName,
+    Expression<int>? yearDays,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1917,6 +2041,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       if (dailyPrayerGoal != null) 'daily_prayer_goal': dailyPrayerGoal,
       if (onboardingCompleted != null)
         'onboarding_completed': onboardingCompleted,
+      if (firstName != null) 'first_name': firstName,
+      if (lastName != null) 'last_name': lastName,
+      if (yearDays != null) 'year_days': yearDays,
     });
   }
 
@@ -1931,6 +2058,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Value<bool>? vitrEnabled,
     Value<int>? dailyPrayerGoal,
     Value<bool>? onboardingCompleted,
+    Value<String>? firstName,
+    Value<String>? lastName,
+    Value<int>? yearDays,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -1945,6 +2075,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       vitrEnabled: vitrEnabled ?? this.vitrEnabled,
       dailyPrayerGoal: dailyPrayerGoal ?? this.dailyPrayerGoal,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      yearDays: yearDays ?? this.yearDays,
     );
   }
 
@@ -1987,6 +2120,15 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     if (onboardingCompleted.present) {
       map['onboarding_completed'] = Variable<bool>(onboardingCompleted.value);
     }
+    if (firstName.present) {
+      map['first_name'] = Variable<String>(firstName.value);
+    }
+    if (lastName.present) {
+      map['last_name'] = Variable<String>(lastName.value);
+    }
+    if (yearDays.present) {
+      map['year_days'] = Variable<int>(yearDays.value);
+    }
     return map;
   }
 
@@ -2002,7 +2144,10 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
           ..write('fastingReminderTime: $fastingReminderTime, ')
           ..write('vitrEnabled: $vitrEnabled, ')
           ..write('dailyPrayerGoal: $dailyPrayerGoal, ')
-          ..write('onboardingCompleted: $onboardingCompleted')
+          ..write('onboardingCompleted: $onboardingCompleted, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('yearDays: $yearDays')
           ..write(')'))
         .toString();
   }
@@ -2772,6 +2917,9 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<bool> vitrEnabled,
   Value<int> dailyPrayerGoal,
   Value<bool> onboardingCompleted,
+  Value<String> firstName,
+  Value<String> lastName,
+  Value<int> yearDays,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> id,
@@ -2784,6 +2932,9 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<bool> vitrEnabled,
   Value<int> dailyPrayerGoal,
   Value<bool> onboardingCompleted,
+  Value<String> firstName,
+  Value<String> lastName,
+  Value<int> yearDays,
 });
 
 class $$SettingsTableFilterComposer
@@ -2843,6 +2994,21 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<bool> get onboardingCompleted => $composableBuilder(
     column: $table.onboardingCompleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get yearDays => $composableBuilder(
+    column: $table.yearDays,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2905,6 +3071,21 @@ class $$SettingsTableOrderingComposer
     column: $table.onboardingCompleted,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get yearDays => $composableBuilder(
+    column: $table.yearDays,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -2961,6 +3142,15 @@ class $$SettingsTableAnnotationComposer
     column: $table.onboardingCompleted,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get firstName =>
+      $composableBuilder(column: $table.firstName, builder: (column) => column);
+
+  GeneratedColumn<String> get lastName =>
+      $composableBuilder(column: $table.lastName, builder: (column) => column);
+
+  GeneratedColumn<int> get yearDays =>
+      $composableBuilder(column: $table.yearDays, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -3001,6 +3191,9 @@ class $$SettingsTableTableManager
                 Value<bool> vitrEnabled = const Value.absent(),
                 Value<int> dailyPrayerGoal = const Value.absent(),
                 Value<bool> onboardingCompleted = const Value.absent(),
+                Value<String> firstName = const Value.absent(),
+                Value<String> lastName = const Value.absent(),
+                Value<int> yearDays = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 theme: theme,
@@ -3012,6 +3205,9 @@ class $$SettingsTableTableManager
                 vitrEnabled: vitrEnabled,
                 dailyPrayerGoal: dailyPrayerGoal,
                 onboardingCompleted: onboardingCompleted,
+                firstName: firstName,
+                lastName: lastName,
+                yearDays: yearDays,
               ),
           createCompanionCallback:
               ({
@@ -3025,6 +3221,9 @@ class $$SettingsTableTableManager
                 Value<bool> vitrEnabled = const Value.absent(),
                 Value<int> dailyPrayerGoal = const Value.absent(),
                 Value<bool> onboardingCompleted = const Value.absent(),
+                Value<String> firstName = const Value.absent(),
+                Value<String> lastName = const Value.absent(),
+                Value<int> yearDays = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 theme: theme,
@@ -3036,6 +3235,9 @@ class $$SettingsTableTableManager
                 vitrEnabled: vitrEnabled,
                 dailyPrayerGoal: dailyPrayerGoal,
                 onboardingCompleted: onboardingCompleted,
+                firstName: firstName,
+                lastName: lastName,
+                yearDays: yearDays,
               ),
           withReferenceMapper: (p0) => p0
               .map(
