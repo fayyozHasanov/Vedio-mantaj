@@ -5,7 +5,8 @@
 // Opens the site in Chromium (iPad-sized viewport), and checks that the app
 // starts, onboarding works, data survives a reload, the app opens offline
 // via the service worker, there are no page errors, and measures startup
-// time and scroll frame times. Prints a JSON report; exits 1 on failure.
+// time, scroll frame times and how fast the zikr counter reacts.
+// Prints a JSON report; exits 1 on failure.
 const { chromium } = require('playwright');
 
 const URL_ = process.argv[2] || 'https://fayyozhasanov.github.io/Vedio-mantaj/';
@@ -99,6 +100,40 @@ const SHOT = process.argv[3] || 'qazohisob-check.png';
       };
     });
     pass('scroll', JSON.stringify(report.scroll));
+
+    // Zikr counter: fast tapping must stay responsive (no freezing).
+    await page.getByRole('tab', { name: /Zikr/ }).first().click()
+      .catch(() => page.getByText('Zikr').first().click());
+    await page.waitForTimeout(2000);
+    const counter = page.getByRole('button', { name: /Tasbih/ }).first();
+    const taps = 30;
+    await counter.scrollIntoViewIfNeeded();
+    const box = await counter.boundingBox();
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+    const tapStart = Date.now();
+    for (let i = 0; i < taps; i++) {
+      await page.mouse.click(cx, cy);
+      await page.waitForTimeout(40); // a fast human tapping rhythm
+    }
+    // Every tap must be counted promptly.
+    await page.waitForFunction(
+      (n) => [...document.querySelectorAll('flt-semantics')].some((e) =>
+        (e.getAttribute('aria-label') || '').includes(`Tasbih: ${n} /`)),
+      taps,
+      { timeout: 3000 },
+    ).catch(() => {});
+    const label = (await counter.getAttribute('aria-label')) || '';
+    report.zikr = {
+      msPerTap: Math.round((Date.now() - tapStart) / taps),
+      counted: (label.match(/Tasbih: \d+ \/ \d+/) || [label])[0],
+    };
+    if (!label.includes(`${taps} /`)) fail('zikr', `expected ${taps} taps, got "${label}"`);
+    else if (report.zikr.msPerTap > 250) fail('zikr', `slow: ${report.zikr.msPerTap} ms per tap`);
+    else pass('zikr', JSON.stringify(report.zikr));
+    await page.getByRole('tab', { name: /Bosh sahifa/ }).first().click()
+      .catch(() => page.getByText('Bosh sahifa').first().click());
+    await page.waitForTimeout(1500);
 
     // Persistence: after reload the onboarding must not come back.
     await page.reload({ waitUntil: 'load' });
