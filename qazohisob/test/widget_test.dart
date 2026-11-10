@@ -155,7 +155,7 @@ void main() {
   }, seed: seedDebts);
 
   testApp('prayer tracker: +1 and multiple completions', (tester) async {
-    await tapAndSettle(tester, find.text('Namoz qazolari'));
+    await tapAndSettle(tester, find.byKey(const Key('tab_prayer')));
     expect(await textOf(tester, find.byKey(const Key('remaining_asr'))), '10');
 
     await tapAndSettle(tester, find.byKey(const Key('quick_asr')));
@@ -173,7 +173,7 @@ void main() {
   }, seed: seedDebts);
 
   testApp('completing more than owed asks for confirmation', (tester) async {
-    await tapAndSettle(tester, find.text('Namoz qazolari'));
+    await tapAndSettle(tester, find.byKey(const Key('tab_prayer')));
     await tapAndSettle(tester, find.byKey(const Key('quick_shom')));
     expect(find.text('Qarzdan ortiq miqdor'), findsOneWidget);
     await tester.tap(find.widgetWithText(TextButton, 'Bekor qilish'));
@@ -183,7 +183,7 @@ void main() {
   });
 
   testApp('prayer detail shows history after adding debt', (tester) async {
-    await tapAndSettle(tester, find.text('Namoz qazolari'));
+    await tapAndSettle(tester, find.byKey(const Key('tab_prayer')));
     await tapAndSettle(tester, find.byKey(const Key('addDebt_xufton')));
     await tester.enterText(find.byKey(const Key('quantityField')), '3');
     await tester.pumpAndSettle();
@@ -200,7 +200,7 @@ void main() {
   }, seed: seedDebts);
 
   testApp('fasting tracker reduces debt by exactly one day', (tester) async {
-    await tapAndSettle(tester, find.text('Ro‘za qazolari'));
+    await tapAndSettle(tester, find.byKey(const Key('tab_fasting')));
     await tapAndSettle(tester, find.byKey(const Key('fastComplete')));
     expect(find.text('Ro‘za tutdim'), findsWidgets);
     await tapAndSettle(tester, find.byKey(const Key('quantityConfirm')));
@@ -273,7 +273,7 @@ void main() {
   testApp(
     'reports show statistics and a navigable calendar',
     (tester) async {
-      await tapAndSettle(tester, find.text('Hisobot'));
+      await tapAndSettle(tester, find.byKey(const Key('tab_reports')));
       // 6 completed out of 55 total.
       expect(
         await textOf(tester, find.byKey(const Key('statsOverall'))),
@@ -316,11 +316,11 @@ void main() {
 
     await tapAndSettle(tester, find.byKey(const Key('settingsVitr')));
     await tapAndSettle(tester, find.byType(BackButton));
-    await tapAndSettle(tester, find.text('Namoz qazolari'));
+    await tapAndSettle(tester, find.byKey(const Key('tab_prayer')));
     await reveal(tester, find.byKey(const Key('prayerCard_vitr')));
     expect(find.byKey(const Key('prayerCard_vitr')), findsOneWidget);
 
-    await tapAndSettle(tester, find.text('Bosh sahifa'));
+    await tapAndSettle(tester, find.byKey(const Key('tab_home')));
     await tapAndSettle(tester, find.byKey(const Key('settingsButton')));
     await tapAndSettle(tester, find.byKey(const Key('resetData')));
     await tapAndSettle(tester, find.text('Davom etish'));
@@ -342,8 +342,13 @@ void main() {
       expect(hero.left, greaterThan((screen.width - 680) / 2 - 1));
       expect(card.right, lessThan((screen.width + 680) / 2 + 1));
 
-      for (final tab in ['Namoz qazolari', 'Ro‘za qazolari', 'Hisobot']) {
-        await tapAndSettle(tester, find.text(tab));
+      for (final tab in [
+        'tab_prayer',
+        'tab_fasting',
+        'tab_zikr',
+        'tab_reports',
+      ]) {
+        await tapAndSettle(tester, find.byKey(Key(tab)));
       }
       await tapAndSettle(tester, find.text('Kalendar'));
       expect(
@@ -366,4 +371,57 @@ void main() {
     size: const Size(1668, 2388),
     pixelRatio: 2,
   );
+
+  testApp('zikr: counting, auto-advance, undo, sessions and home card', (
+    tester,
+  ) async {
+    await tapAndSettle(tester, find.byKey(const Key('tab_zikr')));
+    expect(find.text('Kunlik zikr'), findsOneWidget);
+    // 10:00 → after Bomdod.
+    expect(
+      await textOf(tester, find.byKey(const Key('zikrLatin'))),
+      'Lo iloha illallohu Muhammadur Rasululloh',
+    );
+    final tap = find.byKey(const Key('zikrTap'));
+    await tester.ensureVisible(tap);
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 101; i++) {
+      await tester.tap(tap);
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+    expect(
+      await textOf(tester, find.byKey(const Key('zikrItemCount_0'))),
+      '101 / 101',
+    );
+    // Moved on to the next tasbih automatically.
+    expect(
+      await textOf(tester, find.byKey(const Key('zikrLatin'))),
+      'Subhonalloh',
+    );
+    await tester.ensureVisible(tap);
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(tap);
+      await tester.pump();
+    }
+    await tapAndSettle(tester, find.byKey(const Key('zikrUndo')));
+    expect(await textOf(tester, find.byKey(const Key('zikrCount'))), '2');
+    expect(
+      await textOf(tester, find.byKey(const Key('sessionDone_morning'))),
+      '1 / 6 tasbih',
+    );
+    // Let the batched save run, then check the evening session is separate.
+    await tester.pump(const Duration(seconds: 1));
+    await tapAndSettle(tester, find.byKey(const Key('session_evening')));
+    expect(await textOf(tester, find.byKey(const Key('zikrCount'))), '0');
+    expect(
+      await textOf(tester, find.byKey(const Key('sessionDone_morning'))),
+      '1 / 6 tasbih',
+    );
+    // Home shows today's progress.
+    await tapAndSettle(tester, find.byKey(const Key('tab_home')));
+    await reveal(tester, find.byKey(const Key('zikrTodayCard')));
+    expect(find.text('1 / 6 tasbih'), findsOneWidget);
+  });
 }

@@ -13,6 +13,7 @@ import '../../core/widgets/progress.dart';
 import '../../shared/domain/debt_summary.dart';
 import '../../shared/domain/period.dart';
 import '../../shared/domain/statistics.dart';
+import '../../shared/domain/zikr.dart';
 import '../../shared/providers.dart';
 import '../../shared/widgets/pickers.dart';
 import '../../shared/widgets/record_tile.dart';
@@ -160,6 +161,8 @@ class _HomeBody extends ConsumerWidget {
           goal: settings?.dailyPrayerGoal ?? 5,
           vitrEnabled: vitr,
         ),
+        const SectionHeader('Bugungi zikr'),
+        const _ZikrTodayCard(),
         const SectionHeader('Tezkor amallar'),
         Row(
           children: [
@@ -656,6 +659,63 @@ class _PrayerRow extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Today's wird progress; opens the Zikr tab.
+class _ZikrTodayCard extends ConsumerWidget {
+  const _ZikrTodayCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final today = dateOnly(ref.watch(clockProvider)());
+    final day = ref.watch(zikrHistoryProvider).value?[today];
+    final p = context.palette;
+    return AppCard(
+      key: const Key('zikrTodayCard'),
+      onTap: () => context.go('/zikr'),
+      child: Row(
+        children: [
+          for (final s in ZikrSession.values) ...[
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final progress = day?[s] ?? ZikrProgress.empty();
+                  return Row(
+                    children: [
+                      ProgressRing(
+                        value: progress.fraction,
+                        size: 44,
+                        stroke: 5,
+                        colors: [p.prayer, p.gold],
+                        child: progress.isComplete
+                            ? Icon(Icons.check_rounded, size: 20, color: p.gold)
+                            : null,
+                      ),
+                      const SizedBox(width: Gap.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(s.label, style: context.text.titleSmall),
+                            Text(
+                              '${progress.doneItems} / '
+                              '${NaqshbandiyaWird.items.length} tasbih',
+                              style: context.text.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            if (s == ZikrSession.morning) const SizedBox(width: Gap.md),
+          ],
+        ],
       ),
     );
   }

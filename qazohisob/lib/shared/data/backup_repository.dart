@@ -28,6 +28,7 @@ class BackupRepository {
     final fasting = await (_db.select(
       _db.fastingDebts,
     )..where((t) => t.id.equals(1))).getSingle();
+    final zikr = await _db.select(_db.zikrCounts).get();
     final records = await (_db.select(
       _db.worshipRecords,
     )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
@@ -75,6 +76,16 @@ class BackupRepository {
             'editedAt': r.editedAt?.toIso8601String(),
             'reversedAt': r.reversedAt?.toIso8601String(),
             'note': r.note,
+          },
+      ],
+      'zikr': [
+        for (final z in zikr)
+          {
+            'day': z.day.toIso8601String(),
+            'session': z.session.name,
+            'item': z.item,
+            'count': z.count,
+            'updatedAt': z.updatedAt.toIso8601String(),
           },
       ],
     };
@@ -148,6 +159,7 @@ class BackupRepository {
     final parsed = _parse(data);
     await _db.transaction(() async {
       await _db.delete(_db.worshipRecords).go();
+      await _db.delete(_db.zikrCounts).go();
       final now = _now();
       for (final type in PrayerType.values) {
         await (_db.update(
@@ -165,7 +177,10 @@ class BackupRepository {
           updatedAt: Value(now),
         ),
       );
-      await _db.batch((b) => b.insertAll(_db.worshipRecords, parsed.records));
+      await _db.batch((b) {
+        b.insertAll(_db.worshipRecords, parsed.records);
+        b.insertAll(_db.zikrCounts, parsed.zikr);
+      });
       await (_db.update(_db.settings)..where((t) => t.id.equals(1))).write(
         parsed.settings.copyWith(onboardingCompleted: const Value(true)),
       );
@@ -298,11 +313,45 @@ class BackupRepository {
           : const Value.absent(),
     );
 
+    // Zikr counters were added later; older backups have none.
+    final zikr = <ZikrCountsCompanion>[];
+    final seenZikr = <String>{};
+    final zikrList = data['zikr'];
+    if (zikrList is List) {
+      for (final item in zikrList) {
+        if (item is! Map<String, Object?>) {
+          throw const BackupFormatException('Zikr ro‘yxati noto‘g‘ri.');
+        }
+        final day = dateOnly(date(item, 'day'));
+        final session = byName(
+          ZikrSession.values,
+          read<String>(item, 'session'),
+        );
+        final index = read<int>(item, 'item');
+        if (index < 0 || index > 20) {
+          throw const BackupFormatException('Zikr tartib raqami noto‘g‘ri.');
+        }
+        if (!seenZikr.add('${day.toIso8601String()}|${session.name}|$index')) {
+          continue;
+        }
+        zikr.add(
+          ZikrCountsCompanion.insert(
+            day: day,
+            session: session,
+            item: index,
+            count: nonNegative(item, 'count'),
+            updatedAt: date(item, 'updatedAt'),
+          ),
+        );
+      }
+    }
+
     return _ParsedBackup(
       prayerInitial: prayerInitial,
       fastingInitial: fastingInitial,
       records: records,
       settings: settings,
+      zikr: zikr,
     );
   }
 
@@ -312,6 +361,7 @@ class BackupRepository {
   Future<void> resetAll() => _db.transaction(() async {
     final now = _now();
     await _db.delete(_db.worshipRecords).go();
+    await _db.delete(_db.zikrCounts).go();
     await _db
         .update(_db.prayerDebts)
         .write(
@@ -345,10 +395,12 @@ class _ParsedBackup {
     required this.fastingInitial,
     required this.records,
     required this.settings,
+    required this.zikr,
   });
 
   final Map<PrayerType, int> prayerInitial;
   final int fastingInitial;
   final List<WorshipRecordsCompanion> records;
   final SettingsCompanion settings;
+  final List<ZikrCountsCompanion> zikr;
 }

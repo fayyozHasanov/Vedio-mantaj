@@ -40,3 +40,17 @@ enum RecordAction {
 }
 
 enum AppThemeMode { system, light, dark }
+
+/// The two daily times of the zikr wird.
+enum ZikrSession {
+  /// After Fajr (Bomdod) until sunrise.
+  morning('Bomdoddan keyin', 'quyosh chiqquncha'),
+
+  /// After Asr until sunset.
+  evening('Asrdan keyin', 'quyosh botguncha');
+
+  const ZikrSession(this.label, this.until);
+
+  final String label;
+  final String until;
+}
