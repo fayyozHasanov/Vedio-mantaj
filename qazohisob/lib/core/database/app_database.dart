@@ -1,0 +1,78 @@
+import 'package:drift/drift.dart';
+import 'package:drift_flutter/drift_flutter.dart';
+
+import '../constants/worship_types.dart';
+import 'tables.dart';
+
+part 'app_database.g.dart';
+
+@DriftDatabase(tables: [PrayerDebts, FastingDebts, WorshipRecords, Settings])
+class AppDatabase extends _$AppDatabase {
+  AppDatabase(super.executor);
+
+  /// Opens the on-device database file.
+  factory AppDatabase.open() => AppDatabase(driftDatabase(name: 'qazohisob'));
+
+  /// Bump this and add a step in [migration] whenever the schema changes.
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      // Run each step in order so users upgrading across several
+      // versions get every change. Example for a future version 2:
+      //   if (from < 2) { await m.addColumn(...); }
+      for (var version = from + 1; version <= to; version++) {
+        await _migrateTo(m, version);
+      }
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+      await ensureSeedData();
+    },
+  );
+
+  Future<void> _migrateTo(Migrator m, int version) async {
+    switch (version) {
+      // No migrations yet: version 1 is the first released schema.
+      default:
+        break;
+    }
+  }
+
+  /// Makes sure the singleton rows exist. Safe to call repeatedly.
+  Future<void> ensureSeedData() async {
+    final now = DateTime.now();
+    await batch((b) {
+      b.insert(
+        settings,
+        SettingsCompanion.insert(id: const Value(1)),
+        mode: InsertMode.insertOrIgnore,
+      );
+      b.insert(
+        fastingDebts,
+        FastingDebtsCompanion.insert(
+          id: const Value(1),
+          createdAt: now,
+          updatedAt: now,
+        ),
+        mode: InsertMode.insertOrIgnore,
+      );
+      for (final type in PrayerType.values) {
+        b.insert(
+          prayerDebts,
+          PrayerDebtsCompanion.insert(
+            prayerType: type,
+            createdAt: now,
+            updatedAt: now,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+      }
+    });
+  }
+}
