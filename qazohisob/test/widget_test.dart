@@ -380,7 +380,7 @@ void main() {
     // 10:00 → after Bomdod.
     expect(
       await textOf(tester, find.byKey(const Key('zikrLatin'))),
-      'Lo iloha illallohu Muhammadur Rasululloh',
+      'La iloha illallohu Muhammadur Rasululloh',
     );
     final tap = find.byKey(const Key('zikrTap'));
     await tester.ensureVisible(tap);
