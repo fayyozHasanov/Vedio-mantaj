@@ -26,20 +26,22 @@ class ProgressRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: value.clamp(0.0, 1.0)),
-      duration: const Duration(milliseconds: 900),
-      curve: Curves.easeOutCubic,
-      builder: (context, v, _) => SizedBox.square(
-        dimension: size,
-        child: CustomPaint(
-          painter: _RingPainter(
-            value: v,
-            stroke: stroke,
-            colors: colors ?? [p.prayer, p.gold],
-            track: trackColor ?? p.track,
+    return RepaintBoundary(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: value.clamp(0.0, 1.0)),
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.easeOutCubic,
+        builder: (context, v, _) => SizedBox.square(
+          dimension: size,
+          child: CustomPaint(
+            painter: _RingPainter(
+              value: v,
+              stroke: stroke,
+              colors: colors ?? [p.prayer, p.gold],
+              track: trackColor ?? p.track,
+            ),
+            child: Center(child: child),
           ),
-          child: Center(child: child),
         ),
       ),
     );
@@ -110,31 +112,33 @@ class ProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.palette;
     final c = color ?? p.prayer;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(height),
-      child: SizedBox(
-        height: height,
-        child: Stack(
-          children: [
-            Positioned.fill(child: ColoredBox(color: trackColor ?? p.track)),
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: value.clamp(0.0, 1.0)),
-              duration: const Duration(milliseconds: 700),
-              curve: Curves.easeOutCubic,
-              builder: (context, v, _) => FractionallySizedBox(
-                widthFactor: v,
-                heightFactor: 1,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(height),
-                    gradient: LinearGradient(
-                      colors: [c, Color.lerp(c, p.gold, 0.35)!],
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(height),
+        child: SizedBox(
+          height: height,
+          child: Stack(
+            children: [
+              Positioned.fill(child: ColoredBox(color: trackColor ?? p.track)),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: value.clamp(0.0, 1.0)),
+                duration: const Duration(milliseconds: 700),
+                curve: Curves.easeOutCubic,
+                builder: (context, v, _) => FractionallySizedBox(
+                  widthFactor: v,
+                  heightFactor: 1,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(height),
+                      gradient: LinearGradient(
+                        colors: [c, Color.lerp(c, p.gold, 0.35)!],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

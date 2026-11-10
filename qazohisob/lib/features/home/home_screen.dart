@@ -228,13 +228,15 @@ class _HeroCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [p.heroStart, p.heroEnd],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: p.heroEnd.withValues(alpha: 0.35),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
-          ),
-        ],
+        boxShadow: kLiteEffects
+            ? null
+            : [
+                BoxShadow(
+                  color: p.heroEnd.withValues(alpha: 0.35),
+                  blurRadius: 28,
+                  offset: const Offset(0, 12),
+                ),
+              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
