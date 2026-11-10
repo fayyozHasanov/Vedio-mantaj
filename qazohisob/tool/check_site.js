@@ -1,4 +1,4 @@
-// Health check for the deployed QazoHisob web app.
+// Health check for the deployed IBODAT (QazoHisob) web app.
 //
 //   node qazohisob/tool/check_site.js [url] [screenshot.png]
 //

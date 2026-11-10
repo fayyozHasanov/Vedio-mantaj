@@ -224,7 +224,7 @@ void main() {
   testApp('onboarding: name, period-based debts, then the dashboard', (
     tester,
   ) async {
-    expect(find.text('QazoHisob’ga\nxush kelibsiz'), findsOneWidget);
+    expect(find.text('IBODAT ilovasiga\nxush kelibsiz'), findsOneWidget);
     await tapAndSettle(tester, find.byKey(const Key('onboardingNext')));
     await signIn(tester);
     for (var i = 0; i < 2; i++) {
@@ -325,7 +325,7 @@ void main() {
     await tapAndSettle(tester, find.byKey(const Key('resetData')));
     await tapAndSettle(tester, find.text('Davom etish'));
     await tapAndSettle(tester, find.text('Ha, o‘chirish'));
-    expect(find.text('QazoHisob’ga\nxush kelibsiz'), findsOneWidget);
+    expect(find.text('IBODAT ilovasiga\nxush kelibsiz'), findsOneWidget);
   }, seed: seedDebts);
 
   // iPad Pro 11" in landscape (1194 x 834 points).

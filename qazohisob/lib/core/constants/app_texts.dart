@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'worship_types.dart';
 
 abstract final class AppTexts {
-  static const appName = 'QazoHisob';
+  static const appName = 'IBODAT';
 
   static const disclaimerTitle = 'Muhim eslatma';
   static const disclaimer =
-      'QazoHisob — hisob yuritish vositasi, fatvo manbai emas. Qazo '
+      'IBODAT — hisob yuritish vositasi, fatvo manbai emas. Qazo '
       'miqdorlarini siz o‘zingiz kiritasiz: ilova diniy majburiyatlaringizni '
       'o‘zi hisoblab chiqarmaydi va hech narsani avtomatik belgilamaydi.\n\n'
       'Qazo namoz va ro‘zalarni hisoblash usullari hamda ularga oid hukmlar '

@@ -78,7 +78,7 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
           showSnack(
             context,
             'Bildirishnomalarga ruxsat berilmadi. iPhone Sozlamalari → '
-            'QazoHisob bo‘limidan ruxsat bering.',
+            'IBODAT bo‘limidan ruxsat bering.',
           );
         }
         return;
