@@ -25,7 +25,7 @@ abstract final class NaqshbandiyaWird {
 
   static const items = <ZikrItem>[
     ZikrItem(
-      latin: 'Lo iloha illallohu Muhammadur Rasululloh',
+      latin: 'La iloha illallohu Muhammadur Rasululloh',
       arabic: 'لَا إِلٰهَ إِلَّا اللّٰهُ مُحَمَّدٌ رَسُولُ اللّٰهِ',
     ),
     ZikrItem(latin: 'Subhonalloh', arabic: 'سُبْحَانَ اللّٰهِ'),
