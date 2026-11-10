@@ -5,7 +5,9 @@ import '../core/notifications/reminder_scheduler.dart';
 import 'data/backup_repository.dart';
 import 'data/settings_repository.dart';
 import 'data/worship_repository.dart';
+import 'data/zikr_repository.dart';
 import 'domain/debt_summary.dart';
+import 'domain/zikr.dart';
 
 /// Overridden in `main.dart` (real database) and in tests (in-memory).
 final databaseProvider = Provider<AppDatabase>(
@@ -46,3 +48,18 @@ final snapshotProvider = StreamProvider<WorshipSnapshot>(
 final settingsProvider = StreamProvider<Setting>(
   (ref) => ref.watch(settingsRepositoryProvider).watch(),
 );
+
+final zikrRepositoryProvider = Provider<ZikrRepository>(
+  (ref) => ZikrRepository(
+    ref.watch(databaseProvider),
+    now: ref.watch(clockProvider),
+  ),
+);
+
+/// Zikr counters of the last 60 days (for today's card, history, streak).
+final zikrHistoryProvider = StreamProvider<Map<DateTime, ZikrDay>>((ref) {
+  final now = ref.watch(clockProvider)();
+  return ref
+      .watch(zikrRepositoryProvider)
+      .watchSince(DateTime(now.year, now.month, now.day - 60));
+});

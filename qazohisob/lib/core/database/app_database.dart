@@ -7,7 +7,9 @@ import 'tables.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [PrayerDebts, FastingDebts, WorshipRecords, Settings])
+@DriftDatabase(
+  tables: [PrayerDebts, FastingDebts, WorshipRecords, Settings, ZikrCounts],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
@@ -18,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump this and add a step in [migration] whenever the schema changes.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -45,6 +47,10 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(settings, settings.firstName);
         await m.addColumn(settings, settings.lastName);
         await m.addColumn(settings, settings.yearDays);
+      case 3:
+        // Daily zikr counters.
+        await m.createTable(zikrCounts);
+        await m.createIndex(zikrCountsDay);
       default:
         break;
     }

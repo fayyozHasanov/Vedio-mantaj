@@ -74,7 +74,7 @@ void main() {
     });
   });
 
-  test('schema v1 database is upgraded to v2 keeping data', () async {
+  test('schema v1 database is upgraded to the latest keeping data', () async {
     final dir = await Directory.systemTemp.createTemp('qazohisob_mig');
     final file = File('${dir.path}/db.sqlite');
     try {
@@ -87,6 +87,7 @@ void main() {
       for (final column in ['first_name', 'last_name', 'year_days']) {
         await db.customStatement('ALTER TABLE settings DROP COLUMN $column');
       }
+      await db.customStatement('DROP TABLE zikr_counts');
       await db.customStatement('PRAGMA user_version = 1');
       await db.close();
 
@@ -100,7 +101,9 @@ void main() {
       final snap = await WorshipRepository(db).loadSnapshot();
       expect(snap.prayer(PrayerType.bomdod).remaining, 42);
       final version = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(version.read<int>('user_version'), 2);
+      expect(version.read<int>('user_version'), 3);
+      // v3 added the zikr table.
+      await db.customSelect('SELECT COUNT(*) FROM zikr_counts').get();
       await db.close();
     } finally {
       await dir.delete(recursive: true);

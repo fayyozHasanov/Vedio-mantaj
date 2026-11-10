@@ -57,6 +57,29 @@ class WorshipRecords extends Table {
   List<String> get customConstraints => ['CHECK (quantity >= 0)'];
 }
 
+/// Daily zikr counters: one row per day, session and tasbih (schema v3).
+@TableIndex(name: 'zikr_counts_day', columns: {#day})
+class ZikrCounts extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// Local calendar day (midnight).
+  DateTimeColumn get day => dateTime()();
+  TextColumn get session => textEnum<ZikrSession>()();
+
+  /// Index of the tasbih in the wird (0-based).
+  IntColumn get item => integer()();
+  IntColumn get count => integer()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {day, session, item},
+  ];
+
+  @override
+  List<String> get customConstraints => ['CHECK (count >= 0)'];
+}
+
 /// App settings. Holds a single row (id = 1).
 class Settings extends Table {
   IntColumn get id => integer()();

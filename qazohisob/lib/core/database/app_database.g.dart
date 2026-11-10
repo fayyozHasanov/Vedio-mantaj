@@ -2153,6 +2153,412 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   }
 }
 
+class $ZikrCountsTable extends ZikrCounts
+    with TableInfo<$ZikrCountsTable, ZikrCount> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ZikrCountsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<DateTime> day = GeneratedColumn<DateTime>(
+    'day',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ZikrSession, String> session =
+      GeneratedColumn<String>(
+        'session',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<ZikrSession>($ZikrCountsTable.$convertersession);
+  static const VerificationMeta _itemMeta = const VerificationMeta('item');
+  @override
+  late final GeneratedColumn<int> item = GeneratedColumn<int>(
+    'item',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countMeta = const VerificationMeta('count');
+  @override
+  late final GeneratedColumn<int> count = GeneratedColumn<int>(
+    'count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    day,
+    session,
+    item,
+    count,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'zikr_counts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ZikrCount> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('day')) {
+      context.handle(
+        _dayMeta,
+        day.isAcceptableOrUnknown(data['day']!, _dayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayMeta);
+    }
+    if (data.containsKey('item')) {
+      context.handle(
+        _itemMeta,
+        item.isAcceptableOrUnknown(data['item']!, _itemMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemMeta);
+    }
+    if (data.containsKey('count')) {
+      context.handle(
+        _countMeta,
+        count.isAcceptableOrUnknown(data['count']!, _countMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_countMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {day, session, item},
+  ];
+  @override
+  ZikrCount map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ZikrCount(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      day: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}day'],
+      )!,
+      session: $ZikrCountsTable.$convertersession.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}session'],
+        )!,
+      ),
+      item: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}item'],
+      )!,
+      count: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}count'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ZikrCountsTable createAlias(String alias) {
+    return $ZikrCountsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ZikrSession, String, String> $convertersession =
+      const EnumNameConverter<ZikrSession>(ZikrSession.values);
+}
+
+class ZikrCount extends DataClass implements Insertable<ZikrCount> {
+  final int id;
+
+  /// Local calendar day (midnight).
+  final DateTime day;
+  final ZikrSession session;
+
+  /// Index of the tasbih in the wird (0-based).
+  final int item;
+  final int count;
+  final DateTime updatedAt;
+  const ZikrCount({
+    required this.id,
+    required this.day,
+    required this.session,
+    required this.item,
+    required this.count,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['day'] = Variable<DateTime>(day);
+    {
+      map['session'] = Variable<String>(
+        $ZikrCountsTable.$convertersession.toSql(session),
+      );
+    }
+    map['item'] = Variable<int>(item);
+    map['count'] = Variable<int>(count);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ZikrCountsCompanion toCompanion(bool nullToAbsent) {
+    return ZikrCountsCompanion(
+      id: Value(id),
+      day: Value(day),
+      session: Value(session),
+      item: Value(item),
+      count: Value(count),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ZikrCount.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ZikrCount(
+      id: serializer.fromJson<int>(json['id']),
+      day: serializer.fromJson<DateTime>(json['day']),
+      session: $ZikrCountsTable.$convertersession.fromJson(
+        serializer.fromJson<String>(json['session']),
+      ),
+      item: serializer.fromJson<int>(json['item']),
+      count: serializer.fromJson<int>(json['count']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'day': serializer.toJson<DateTime>(day),
+      'session': serializer.toJson<String>(
+        $ZikrCountsTable.$convertersession.toJson(session),
+      ),
+      'item': serializer.toJson<int>(item),
+      'count': serializer.toJson<int>(count),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ZikrCount copyWith({
+    int? id,
+    DateTime? day,
+    ZikrSession? session,
+    int? item,
+    int? count,
+    DateTime? updatedAt,
+  }) => ZikrCount(
+    id: id ?? this.id,
+    day: day ?? this.day,
+    session: session ?? this.session,
+    item: item ?? this.item,
+    count: count ?? this.count,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ZikrCount copyWithCompanion(ZikrCountsCompanion data) {
+    return ZikrCount(
+      id: data.id.present ? data.id.value : this.id,
+      day: data.day.present ? data.day.value : this.day,
+      session: data.session.present ? data.session.value : this.session,
+      item: data.item.present ? data.item.value : this.item,
+      count: data.count.present ? data.count.value : this.count,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ZikrCount(')
+          ..write('id: $id, ')
+          ..write('day: $day, ')
+          ..write('session: $session, ')
+          ..write('item: $item, ')
+          ..write('count: $count, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, day, session, item, count, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ZikrCount &&
+          other.id == this.id &&
+          other.day == this.day &&
+          other.session == this.session &&
+          other.item == this.item &&
+          other.count == this.count &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ZikrCountsCompanion extends UpdateCompanion<ZikrCount> {
+  final Value<int> id;
+  final Value<DateTime> day;
+  final Value<ZikrSession> session;
+  final Value<int> item;
+  final Value<int> count;
+  final Value<DateTime> updatedAt;
+  const ZikrCountsCompanion({
+    this.id = const Value.absent(),
+    this.day = const Value.absent(),
+    this.session = const Value.absent(),
+    this.item = const Value.absent(),
+    this.count = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  ZikrCountsCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime day,
+    required ZikrSession session,
+    required int item,
+    required int count,
+    required DateTime updatedAt,
+  }) : day = Value(day),
+       session = Value(session),
+       item = Value(item),
+       count = Value(count),
+       updatedAt = Value(updatedAt);
+  static Insertable<ZikrCount> custom({
+    Expression<int>? id,
+    Expression<DateTime>? day,
+    Expression<String>? session,
+    Expression<int>? item,
+    Expression<int>? count,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (day != null) 'day': day,
+      if (session != null) 'session': session,
+      if (item != null) 'item': item,
+      if (count != null) 'count': count,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  ZikrCountsCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? day,
+    Value<ZikrSession>? session,
+    Value<int>? item,
+    Value<int>? count,
+    Value<DateTime>? updatedAt,
+  }) {
+    return ZikrCountsCompanion(
+      id: id ?? this.id,
+      day: day ?? this.day,
+      session: session ?? this.session,
+      item: item ?? this.item,
+      count: count ?? this.count,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (day.present) {
+      map['day'] = Variable<DateTime>(day.value);
+    }
+    if (session.present) {
+      map['session'] = Variable<String>(
+        $ZikrCountsTable.$convertersession.toSql(session.value),
+      );
+    }
+    if (item.present) {
+      map['item'] = Variable<int>(item.value);
+    }
+    if (count.present) {
+      map['count'] = Variable<int>(count.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ZikrCountsCompanion(')
+          ..write('id: $id, ')
+          ..write('day: $day, ')
+          ..write('session: $session, ')
+          ..write('item: $item, ')
+          ..write('count: $count, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2160,6 +2566,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $FastingDebtsTable fastingDebts = $FastingDebtsTable(this);
   late final $WorshipRecordsTable worshipRecords = $WorshipRecordsTable(this);
   late final $SettingsTable settings = $SettingsTable(this);
+  late final $ZikrCountsTable zikrCounts = $ZikrCountsTable(this);
   late final Index worshipRecordsDate = Index(
     'worship_records_date',
     'CREATE INDEX worship_records_date ON worship_records (completed_date)',
@@ -2167,6 +2574,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final Index worshipRecordsType = Index(
     'worship_records_type',
     'CREATE INDEX worship_records_type ON worship_records (type, prayer_type)',
+  );
+  late final Index zikrCountsDay = Index(
+    'zikr_counts_day',
+    'CREATE INDEX zikr_counts_day ON zikr_counts (day)',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -2177,8 +2588,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     fastingDebts,
     worshipRecords,
     settings,
+    zikrCounts,
     worshipRecordsDate,
     worshipRecordsType,
+    zikrCountsDay,
   ];
 }
 
@@ -3270,6 +3683,224 @@ typedef $$SettingsTableProcessedTableManager =
       Setting,
       PrefetchHooks Function()
     >;
+typedef $$ZikrCountsTableCreateCompanionBuilder = ZikrCountsCompanion Function({
+  Value<int> id,
+  required DateTime day,
+  required ZikrSession session,
+  required int item,
+  required int count,
+  required DateTime updatedAt,
+});
+typedef $$ZikrCountsTableUpdateCompanionBuilder = ZikrCountsCompanion Function({
+  Value<int> id,
+  Value<DateTime> day,
+  Value<ZikrSession> session,
+  Value<int> item,
+  Value<int> count,
+  Value<DateTime> updatedAt,
+});
+
+class $$ZikrCountsTableFilterComposer
+    extends Composer<_$AppDatabase, $ZikrCountsTable> {
+  $$ZikrCountsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ZikrSession, ZikrSession, String>
+  get session => $composableBuilder(
+    column: $table.session,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get item => $composableBuilder(
+    column: $table.item,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ZikrCountsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ZikrCountsTable> {
+  $$ZikrCountsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get session => $composableBuilder(
+    column: $table.session,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get item => $composableBuilder(
+    column: $table.item,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ZikrCountsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ZikrCountsTable> {
+  $$ZikrCountsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ZikrSession, String> get session =>
+      $composableBuilder(column: $table.session, builder: (column) => column);
+
+  GeneratedColumn<int> get item =>
+      $composableBuilder(column: $table.item, builder: (column) => column);
+
+  GeneratedColumn<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ZikrCountsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ZikrCountsTable,
+          ZikrCount,
+          $$ZikrCountsTableFilterComposer,
+          $$ZikrCountsTableOrderingComposer,
+          $$ZikrCountsTableAnnotationComposer,
+          $$ZikrCountsTableCreateCompanionBuilder,
+          $$ZikrCountsTableUpdateCompanionBuilder,
+          (
+            ZikrCount,
+            BaseReferences<_$AppDatabase, $ZikrCountsTable, ZikrCount>,
+          ),
+          ZikrCount,
+          PrefetchHooks Function()
+        > {
+  $$ZikrCountsTableTableManager(_$AppDatabase db, $ZikrCountsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ZikrCountsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ZikrCountsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ZikrCountsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> day = const Value.absent(),
+                Value<ZikrSession> session = const Value.absent(),
+                Value<int> item = const Value.absent(),
+                Value<int> count = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => ZikrCountsCompanion(
+                id: id,
+                day: day,
+                session: session,
+                item: item,
+                count: count,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime day,
+                required ZikrSession session,
+                required int item,
+                required int count,
+                required DateTime updatedAt,
+              }) => ZikrCountsCompanion.insert(
+                id: id,
+                day: day,
+                session: session,
+                item: item,
+                count: count,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ZikrCountsTable, ZikrCount>(table),
+                  BaseReferences<_$AppDatabase, $ZikrCountsTable, ZikrCount>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ZikrCountsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ZikrCountsTable,
+      ZikrCount,
+      $$ZikrCountsTableFilterComposer,
+      $$ZikrCountsTableOrderingComposer,
+      $$ZikrCountsTableAnnotationComposer,
+      $$ZikrCountsTableCreateCompanionBuilder,
+      $$ZikrCountsTableUpdateCompanionBuilder,
+      (ZikrCount, BaseReferences<_$AppDatabase, $ZikrCountsTable, ZikrCount>),
+      ZikrCount,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3282,4 +3913,6 @@ class $AppDatabaseManager {
       $$WorshipRecordsTableTableManager(_db, _db.worshipRecords);
   $$SettingsTableTableManager get settings =>
       $$SettingsTableTableManager(_db, _db.settings);
+  $$ZikrCountsTableTableManager get zikrCounts =>
+      $$ZikrCountsTableTableManager(_db, _db.zikrCounts);
 }

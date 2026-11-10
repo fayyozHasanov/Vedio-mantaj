@@ -8,6 +8,7 @@ import '../../features/prayer/prayer_screen.dart';
 import '../../features/settings/initial_debt_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/statistics/reports_screen.dart';
+import '../../features/zikr/zikr_screen.dart';
 import '../../shared/widgets/app_shell.dart';
 import '../constants/worship_types.dart';
 
@@ -55,6 +56,14 @@ GoRouter createRouter({required bool onboarded}) => GoRouter(
             GoRoute(
               path: '/fasting',
               builder: (context, state) => const FastingScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/zikr',
+              builder: (context, state) => const ZikrScreen(),
             ),
           ],
         ),

@@ -83,6 +83,9 @@ flutter:
           weight: 600
         - asset: assets/fonts/Inter-Bold.otf
           weight: 700
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
