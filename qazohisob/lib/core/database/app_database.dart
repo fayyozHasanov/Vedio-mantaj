@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
+
+import 'connection/connection.dart';
 
 import '../constants/worship_types.dart';
 import 'tables.dart';
@@ -13,15 +14,7 @@ class AppDatabase extends _$AppDatabase {
   /// Opens the on-device database file.
   /// On the web (PWA build) SQLite runs as WebAssembly in a worker and the
   /// data is kept in the browser's persistent storage.
-  factory AppDatabase.open() => AppDatabase(
-    driftDatabase(
-      name: 'qazohisob',
-      web: DriftWebOptions(
-        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
-        driftWorker: Uri.parse('drift_worker.js'),
-      ),
-    ),
-  );
+  factory AppDatabase.open() => AppDatabase(openConnection('qazohisob'));
 
   /// Bump this and add a step in [migration] whenever the schema changes.
   @override

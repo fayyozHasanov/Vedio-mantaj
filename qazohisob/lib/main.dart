@@ -7,14 +7,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/database/app_database.dart';
 import 'core/notifications/reminder_scheduler.dart';
+import 'core/widgets/startup_error_app.dart';
 import 'shared/data/settings_repository.dart';
 import 'shared/providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await start();
+}
 
-  final db = AppDatabase.open();
-  final settings = await SettingsRepository(db).load();
+/// Opens the database and runs the app. If the database cannot be opened
+/// (e.g. browser storage is unavailable), shows an error screen with a retry
+/// button instead of hanging on the splash screen.
+Future<void> start() async {
+  final AppDatabase db;
+  final Setting settings;
+  try {
+    db = AppDatabase.open();
+    settings = await SettingsRepository(db)
+        .load()
+        .timeout(const Duration(seconds: 20));
+  } catch (error, stack) {
+    debugPrint('QazoHisob startup failed: $error\n$stack');
+    runApp(StartupErrorApp(error: error, onRetry: start));
+    return;
+  }
 
   // Local notifications exist only in the native iOS app; the web (PWA)
   // build has no reminders.
