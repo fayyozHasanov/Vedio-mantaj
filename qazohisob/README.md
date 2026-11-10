@@ -1,4 +1,4 @@
-# QazoHisob
+# IBODAT (QazoHisob)
 
 Qazo namoz va qazo ro‘zalarni hisoblab borish uchun iPhone va iPad ilovasi (Flutter).
 Internetsiz ishlaydi, barcha ma’lumotlar faqat qurilmada saqlanadi.

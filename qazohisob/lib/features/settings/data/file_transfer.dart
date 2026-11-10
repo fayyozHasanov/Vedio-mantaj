@@ -17,7 +17,7 @@ class FileTransfer {
   const FileTransfer();
 
   static String fileName(String extension, DateTime t) =>
-      'qazohisob_${t.year}${two(t.month)}${two(t.day)}_'
+      'ibodat_${t.year}${two(t.month)}${two(t.day)}_'
       '${two(t.hour)}${two(t.minute)}.$extension';
 
   /// UTF-8 bytes; CSV gets a BOM so spreadsheet apps detect the encoding.
@@ -49,7 +49,7 @@ class FileTransfer {
       ShareParams(
         files: [file],
         fileNameOverrides: [name],
-        subject: 'QazoHisob ma’lumotlari',
+        subject: 'IBODAT ma’lumotlari',
         sharePositionOrigin: box == null
             ? null
             : box.localToGlobal(Offset.zero) & box.size,

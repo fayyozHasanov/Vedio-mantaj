@@ -101,7 +101,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     children: [
                       const _IntroPage(
                         hero: AppMark(size: 112),
-                        title: 'QazoHisob’ga\nxush kelibsiz',
+                        title: 'IBODAT ilovasiga\nxush kelibsiz',
                         text:
                             'Qazo namoz va ro‘zalaringizni tartibli, xotirjam '
                             'va maxfiy tarzda hisoblab boring.',

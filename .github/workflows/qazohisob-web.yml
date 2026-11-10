@@ -13,8 +13,10 @@ permissions:
   pages: write
   id-token: write
 
+# One queue per branch, so a push to a feature branch never cancels the
+# deployment running on main.
 concurrency:
-  group: qazohisob-web
+  group: qazohisob-web-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

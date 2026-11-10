@@ -15,7 +15,10 @@ class BackupRepository {
   final AppDatabase _db;
   final DateTime Function() _now;
 
-  static const appId = 'QazoHisob';
+  static const appId = 'IBODAT';
+
+  /// Backups made before the app was renamed are still accepted.
+  static const acceptedAppIds = {appId, 'QazoHisob'};
   static const formatVersion = 1;
 
   // ---------------------------------------------------------------- export
@@ -223,8 +226,8 @@ class BackupRepository {
     if (data is! Map<String, Object?>) {
       throw const BackupFormatException('Zaxira fayli tuzilishi noto‘g‘ri.');
     }
-    if (data['app'] != appId) {
-      throw const BackupFormatException('Bu fayl QazoHisob zaxirasi emas.');
+    if (!acceptedAppIds.contains(data['app'])) {
+      throw const BackupFormatException('Bu fayl IBODAT zaxirasi emas.');
     }
     final format = data['format'];
     if (format is! int || format > formatVersion) {

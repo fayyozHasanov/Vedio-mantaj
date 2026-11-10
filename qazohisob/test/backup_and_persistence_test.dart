@@ -82,7 +82,7 @@ void main() {
       final before = await repo.loadSnapshot();
       final json = await backup.exportJson();
       final map = jsonDecode(json) as Map<String, Object?>;
-      expect(map['app'], 'QazoHisob');
+      expect(map['app'], 'IBODAT');
       expect(map['format'], 1);
 
       await backup.resetAll();
@@ -118,6 +118,13 @@ void main() {
       );
       final after = await repo.loadSnapshot();
       expect(after.prayer(PrayerType.bomdod), before.prayer(PrayerType.bomdod));
+    });
+
+    test('backups made under the old name QazoHisob still restore', () async {
+      final map = jsonDecode(await backup.exportJson()) as Map<String, Object?>;
+      map['app'] = 'QazoHisob';
+      await backup.restoreMap(map);
+      expect((await repo.loadSnapshot()).records, isNotEmpty);
     });
 
     test('restore skips duplicated records', () async {
