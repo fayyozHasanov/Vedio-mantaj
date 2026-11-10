@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <!-- Replaced by the value of `flutter build web --base-href`. -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta name="description" content="Qazo namoz va ro‘zalar hisobi — internetsiz ishlaydi.">
+  <meta name="theme-color" content="#F8F7F2">
+
+  <!-- Installable as a home-screen app on iPad / iPhone (Safari → Share →
+       Add to Home Screen). -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="QazoHisob">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+
+  <title>QazoHisob</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #F8F7F2; }
+    @media (prefers-color-scheme: dark) {
+      html, body { background: #0B1714; }
+    }
+    #splash {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 18px;
+      font-family: -apple-system, system-ui, sans-serif; color: #89928C;
+      transition: opacity .3s ease;
+    }
+    #splash img { width: 96px; height: 96px; border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(16, 61, 50, .25); }
+  </style>
+</head>
+<body>
+  <div id="splash">
+    <img src="icons/Icon-192.png" alt="">
+    <div>QazoHisob</div>
+  </div>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

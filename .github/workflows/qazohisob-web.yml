@@ -1,0 +1,69 @@
+# Builds the QazoHisob web app (installable PWA) and, when the repository is
+# public, publishes it to GitHub Pages.
+name: QazoHisob web
+
+on:
+  push:
+    branches: [main, claude/new-session-oha77e]
+    paths: ['qazohisob/**', '.github/workflows/qazohisob-web.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: qazohisob-web
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qazohisob
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.9
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build web app
+        run: python3 tool/build_web.py
+
+      - name: Upload downloadable build (zip)
+        uses: actions/upload-artifact@v4
+        with:
+          name: qazohisob-web
+          path: qazohisob/build/web
+
+      - name: Upload Pages artifact
+        if: github.event.repository.private == false
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: qazohisob/build/web
+
+  deploy:
+    # GitHub Pages is free only for public repositories.
+    if: github.event.repository.private == false
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
